@@ -1,429 +1,215 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SmartScout – Never Overpay Again</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAIR - Smart Deal Finder</title>
 
-  <style>
-    :root {
-      --bg: #0a0e1a;
-      --card: #141a2e;
-      --dark-card: #0f1322;
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --accent: #fbbf24;
-      --green: #10b981;
-      --red: #ef4444;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --border: rgba(255,255,255,0.08);
-      --progress-bg: rgba(16,185,129,0.15);
-    }
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Cairo', 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.6;
-      padding-bottom: 80px;
-    }
+<style>
 
-    /* Bottom Navigation */
-    nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 72px;
-      background: rgba(20,26,46,0.94);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border);
-      display: flex;
-      z-index: 1000;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
-    }
-    nav a {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.78rem;
-      font-weight: 600;
-      gap: 4px;
-      transition: all 0.25s;
-    }
-    nav a.active, nav a:hover {
-      color: var(--primary);
-    }
-    nav .icon {
-      font-size: 1.6rem;
-      margin-bottom: 2px;
-    }
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:40px;
+}
 
-    .container {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 0 16px;
-    }
+.container{
+max-width:600px;
+margin:auto;
+}
 
-    /* Page Sections */
-    .page { display: none; padding-top: 80px; padding-bottom: 100px; }
-    .page.active { display: block; }
+input{
+width:80%;
+padding:12px;
+border-radius:8px;
+border:none;
+margin:10px;
+}
 
-    /* Hero / Landing */
-    .hero {
-      text-align: center;
-      padding: 100px 0 60px;
-    }
-    .hero h1 {
-      font-size: 2.8rem;
-      font-weight: 900;
-      line-height: 1.15;
-      margin-bottom: 1rem;
-    }
-    .tagline { color: var(--muted); font-size: 1.15rem; margin-bottom: 2.5rem; }
+button{
+padding:12px 20px;
+border:none;
+border-radius:8px;
+background:#6366f1;
+color:white;
+cursor:pointer;
+margin:10px;
+}
 
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.2rem;
-      margin-bottom: 2.5rem;
-    }
-    .stat-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.4rem;
-      text-align: center;
-    }
-    .stat-value {
-      font-size: 2.4rem;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 0.3rem;
-    }
-    .stat-label { font-size: 0.95rem; color: var(--muted); }
+.result{
+background:#1e293b;
+padding:15px;
+margin:10px;
+border-radius:10px;
+}
 
-    .payment-methods {
-      display: flex;
-      justify-content: center;
-      gap: 1.2rem;
-      margin: 2rem 0;
-      flex-wrap: wrap;
-    }
-    .method {
-      background: var(--dark-card);
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      border: 1px solid rgba(99,102,241,0.2);
-    }
-
-    .plans {
-      display: flex;
-      flex-direction: column;
-      gap: 1.4rem;
-      margin: 2.5rem 0;
-    }
-    .plan-card {
-      background: var(--card);
-      border: 2px solid transparent;
-      border-radius: 20px;
-      padding: 1.8rem;
-      position: relative;
-      transition: all 0.3s;
-    }
-    .plan-card.popular {
-      border-color: var(--primary);
-      transform: scale(1.03);
-      box-shadow: 0 0 30px rgba(99,102,241,0.3);
-    }
-    .badge {
-      position: absolute;
-      top: -12px;
-      right: 16px;
-      background: var(--primary);
-      color: white;
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 700;
-    }
-    .plan-title { font-size: 1.5rem; font-weight: 800; }
-    .price {
-      font-size: 3.2rem;
-      font-weight: 900;
-      margin: 0.8rem 0 0.5rem;
-    }
-    .price small { font-size: 1.1rem; opacity: 0.75; }
-    .savings { color: var(--green); font-weight: 700; font-size: 1.1rem; margin-bottom: 1.2rem; }
-    .subscribe-btn {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      border: none;
-      width: 100%;
-      padding: 16px;
-      border-radius: 12px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 1.4rem;
-      transition: all 0.3s;
-    }
-    .subscribe-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99,102,241,0.4); }
-
-    /* Tracker Page */
-    .tracker-header {
-      text-align: center;
-      padding: 100px 0 30px;
-    }
-    .tracker-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .tracker-subtitle { color: var(--muted); font-size: 1rem; }
-
-    .alerts-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin: 1.8rem 0;
-    }
-    .alert-stat {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 1.2rem;
-      text-align: center;
-      font-weight: 700;
-    }
-    .alert-stat span { font-size: 0.9rem; color: var(--muted); display: block; margin-top: 0.3rem; }
-
-    .add-alert-btn {
-      width: 100%;
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 16px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin: 1.5rem 0;
-      cursor: pointer;
-    }
-
-    .alert-card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 1.4rem;
-      margin: 1.2rem 0;
-      border-left: 4px solid var(--green);
-    }
-    .alert-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 0.6rem;
-    }
-    .alert-source { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.8rem; }
-    .alert-progress {
-      height: 8px;
-      background: var(--progress-bg);
-      border-radius: 4px;
-      overflow: hidden;
-      margin: 0.8rem 0;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--green);
-      transition: width 0.8s ease;
-    }
-    .alert-target {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.95rem;
-      margin-top: 0.6rem;
-    }
-  </style>
+</style>
 </head>
+
 <body>
 
-<!-- Pricing / Landing Page -->
-<div id="pricing" class="page active container">
-  <div class="hero">
-    <h1>SmartScout Pro</h1>
-    <p class="tagline">لا تدفع أكثر أبدًا مرة أخرى</p>
-  </div>
+<div class="container">
 
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-value">+40%</div>
-      <div class="stat-label">متوسط التوفير</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">$12M+</div>
-      <div class="stat-label">تم توفيرها</div>
-    </div>
-  </div>
+<h1>FAIR</h1>
+<p>Find Affordable Intelligent Recommendations</p>
 
-  <div class="plans">
-    <div class="plan-card">
-      <div class="plan-title">شهري</div>
-      <div class="price">3.2 π <small>/ شهر</small></div>
-      <button class="subscribe-btn" data-plan="monthly">اشترك شهريًا</button>
-    </div>
+<button onclick="login()">Login with Pi</button>
 
-    <div class="plan-card popular">
-      <div class="badge">الأكثر اختيارًا</div>
-      <div class="plan-title">سنوي</div>
-      <div class="price">1.92 π <small>/ شهر</small></div>
-      <div class="savings">توفير 40%</div>
-      <button class="subscribe-btn" data-plan="annual">اشترك سنويًا</button>
-    </div>
+<hr>
 
-    <div class="plan-card">
-      <div class="plan-title">مدى الحياة</div>
-      <div class="price">47.8 π <small>مرة واحدة</small></div>
-      <div class="savings">بدون تجديد</div>
-      <button class="subscribe-btn" data-plan="lifetime">اشترك مدى الحياة</button>
-    </div>
-  </div>
+<h2>Search Deals</h2>
 
-  <!-- Features Table -->
-  <div class="features-table" style="background:var(--card); border-radius:16px; padding:1.8rem; margin:2.5rem 0;">
-    <h2 style="text-align:center; margin-bottom:1.2rem;">المميزات</h2>
-    <table style="width:100%; border-collapse:collapse;">
-      <tr><th></th><th>مجاني</th><th>Pro</th></tr>
-      <tr><td>تنبيهات انخفاض السعر</td><td>3 شهريًا</td><td>غير محدود</td></tr>
-      <tr><td>توقعات الذكاء الاصطناعي</td><td>أساسية</td><td>متقدمة</td></tr>
-      <tr><td>سجل الأسعار</td><td>30 يوم</td><td>سنتين</td></tr>
-      <tr><td>إشعارات فورية</td><td>✗</td><td>✓</td></tr>
-      <tr><td>جميع الفئات</td><td>✗</td><td>✓</td></tr>
-      <tr><td>بدون إعلانات</td><td>✗</td><td>✓</td></tr>
-    </table>
-  </div>
+<input id="search" placeholder="Search flights, products, hotels">
 
-  <!-- FAQ -->
-  <div class="faq">
-    <h2 style="text-align:center; margin:2.5rem 0 1.5rem;">الأسئلة الشائعة</h2>
-    
-    <div class="faq-item">
-      <div class="faq-q" onclick="this.nextElementSibling.classList.toggle('show')">هل يوجد فترة تجريبية مجانية؟<span>▼</span></div>
-      <div class="faq-a">نعم، 7 أيام تجريبية كاملة المميزات.</div>
-    </div>
-    <!-- أضف باقي الأسئلة بنفس الطريقة -->
-  </div>
+<br>
+
+<button onclick="search()">Search</button>
+
+<div id="results"></div>
+
+<hr>
+
+<h2>Premium</h2>
+
+<p>Unlock AI recommendations</p>
+
+<button onclick="subscribe()">Subscribe - 1 Pi</button>
+
 </div>
-
-<!-- Tracker / Alerts Page -->
-<div id="tracker" class="page container">
-  <div class="tracker-header">
-    <h1 class="tracker-title">My Tracker</h1>
-    <p class="tracker-subtitle">4 تنبيهات نشطة • 4 صفقات تم توفيرها</p>
-  </div>
-
-  <div class="alerts-stats">
-    <div class="alert-stat"><strong>4</strong><span>نشط</span></div>
-    <div class="alert-stat"><strong>1</strong><span>تم الوصول</span></div>
-    <div class="alert-stat"><strong>5</strong><span>إجمالي</span></div>
-  </div>
-
-  <button class="add-alert-btn">+ إضافة تنبيه سعر جديد</button>
-
-  <!-- Example Alert -->
-  <div class="alert-card">
-    <div class="alert-title">Marriott Cancun – 4 ليالي</div>
-    <div class="alert-source">via Booking.com</div>
-    <div class="alert-progress"><div class="progress-fill" style="width:98%"></div></div>
-    <div class="alert-target">
-      <span>الهدف: $150</span>
-      <span>الحالي: $148</span>
-    </div>
-    <div style="margin-top:0.8rem; color:var(--green); font-weight:700;">تم الوصول للهدف!</div>
-  </div>
-
-  <!-- يمكن تكرار الكاردات حسب الحاجة -->
-</div>
-
-<!-- Bottom Navigation -->
-<nav>
-  <a href="#" data-page="pricing" class="active"><span class="icon">🏠</span><span>الرئيسية</span></a>
-  <a href="#" data-page="tracker"><span class="icon">🔔</span><span>التنبيهات</span></a>
-  <a href="#"><span class="icon">👑</span><span>Premium</span></a>
-</nav>
 
 <script>
-  Pi.init({ version: "2.0", sandbox: true }); // غير إلى false للـ Mainnet
 
-  // تبديل الصفحات
-  document.querySelectorAll('nav a').forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      const page = link.getAttribute('data-page');
-      if (!page) return;
+Pi.init({ version: "2.0" });
 
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(page).classList.add('active');
+let user = null;
 
-      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-      link.classList.add('active');
-    });
-  });
+async function login(){
 
-  // دفع Pi
-  async function startPayment(plan) {
-    try {
-      const auth = await Pi.authenticate(['payments'], () => {});
+try{
 
-      const amount = plan === 'monthly' ? 3.2 : plan === 'annual' ? 23 : 47.8;
+const scopes = ['username','payments'];
 
-      Pi.createPayment({
-        amount,
-        memo: `SmartScout Pro – ${plan}`,
-        metadata: { plan_type: plan }
-      }, {
-        onReadyForServerApproval: async (paymentId) => {
-          const res = await fetch('/api/approve', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId })
-          });
-          if (!res.ok) throw new Error('فشل الموافقة');
-        },
-        onReadyForServerCompletion: async (paymentId, txid) => {
-          const res = await fetch('/api/complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId, txid })
-          });
-          if (res.ok) {
-            alert('تم الاشتراك بنجاح! شكرًا لدعمك');
-          } else {
-            alert('فشل إكمال الدفع');
-          }
-        },
-        onCancel: () => alert('تم إلغاء الدفع'),
-        onError: err => alert('خطأ في الدفع: ' + err.message)
-      });
-    } catch (err) {
-      alert('فشل الربط مع Pi: ' + err.message);
-    }
-  }
+user = await Pi.authenticate(scopes);
 
-  // ربط الأزرار
-  document.querySelectorAll('.subscribe-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const plan = btn.getAttribute('data-plan');
-      startPayment(plan);
-    });
-  });
+alert("Welcome " + user.user.username);
+
+}catch(e){
+console.error(e);
+}
+
+}
+
+function search(){
+
+let query = document.getElementById("search").value;
+
+let results = document.getElementById("results");
+
+results.innerHTML = "";
+
+let fakeResults = [
+
+{name:"Flight Cairo → Dubai",price:120,rating:4.5},
+
+{name:"Hotel Dubai Marina",price:80,rating:4.2},
+
+{name:"iPhone Deal",price:900,rating:4.8}
+
+];
+
+fakeResults.forEach(item=>{
+
+results.innerHTML += `
+<div class="result">
+<h3>${item.name}</h3>
+<p>Price: $${item.price}</p>
+<p>Rating: ⭐ ${item.rating}</p>
+</div>
+`;
+
+});
+
+}
+
+function subscribe(){
+
+const paymentData = {
+
+amount:1,
+
+memo:"FAIR Premium",
+
+metadata:{type:"premium"}
+
+};
+
+const callbacks = {
+
+onReadyForServerApproval: function(paymentId){
+
+fetch("/api/approve",{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({paymentId})
+
+});
+
+},
+
+onReadyForServerCompletion: function(paymentId,txid){
+
+fetch("/api/complete",{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+paymentId:paymentId,
+
+txid:txid
+
+})
+
+});
+
+},
+
+onCancel: function(paymentId){
+
+alert("Payment cancelled");
+
+},
+
+onError: function(error, payment){
+
+console.error(error);
+
+}
+
+};
+
+Pi.createPayment(paymentData,callbacks);
+
+}
+
 </script>
 
 </body>
-          </html>
+  </html>
