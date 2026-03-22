@@ -1,187 +1,429 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAIR | محرك البحث العادل الذكي</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&display=swap');
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 100%);
-            color: white;
-            overflow-x: hidden;
-        }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .active-tab { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important; color: white !important; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
-        .search-input:focus { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
-        .btn-glow:hover { box-shadow: 0 0 25px rgba(168, 85, 247, 0.6); transform: translateY(-2px); }
-        .pi-badge { background: linear-gradient(90deg, #ffeb3b, #fbc02d); color: #000; font-weight: 900; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartScout – Never Overpay Again</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --card: #141a2e;
+      --dark-card: #0f1322;
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --accent: #fbbf24;
+      --green: #10b981;
+      --red: #ef4444;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: rgba(255,255,255,0.08);
+      --progress-bg: rgba(16,185,129,0.15);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    /* Bottom Navigation */
+    nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 72px;
+      background: rgba(20,26,46,0.94);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 1000;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    }
+    nav a {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      gap: 4px;
+      transition: all 0.25s;
+    }
+    nav a.active, nav a:hover {
+      color: var(--primary);
+    }
+    nav .icon {
+      font-size: 1.6rem;
+      margin-bottom: 2px;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Page Sections */
+    .page { display: none; padding-top: 80px; padding-bottom: 100px; }
+    .page.active { display: block; }
+
+    /* Hero / Landing */
+    .hero {
+      text-align: center;
+      padding: 100px 0 60px;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .tagline { color: var(--muted); font-size: 1.15rem; margin-bottom: 2.5rem; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.4rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 0.3rem;
+    }
+    .stat-label { font-size: 0.95rem; color: var(--muted); }
+
+    .payment-methods {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    .method {
+      background: var(--dark-card);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+
+    .plans {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+      margin: 2.5rem 0;
+    }
+    .plan-card {
+      background: var(--card);
+      border: 2px solid transparent;
+      border-radius: 20px;
+      padding: 1.8rem;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .plan-card.popular {
+      border-color: var(--primary);
+      transform: scale(1.03);
+      box-shadow: 0 0 30px rgba(99,102,241,0.3);
+    }
+    .badge {
+      position: absolute;
+      top: -12px;
+      right: 16px;
+      background: var(--primary);
+      color: white;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .plan-title { font-size: 1.5rem; font-weight: 800; }
+    .price {
+      font-size: 3.2rem;
+      font-weight: 900;
+      margin: 0.8rem 0 0.5rem;
+    }
+    .price small { font-size: 1.1rem; opacity: 0.75; }
+    .savings { color: var(--green); font-weight: 700; font-size: 1.1rem; margin-bottom: 1.2rem; }
+    .subscribe-btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 1.4rem;
+      transition: all 0.3s;
+    }
+    .subscribe-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99,102,241,0.4); }
+
+    /* Tracker Page */
+    .tracker-header {
+      text-align: center;
+      padding: 100px 0 30px;
+    }
+    .tracker-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .tracker-subtitle { color: var(--muted); font-size: 1rem; }
+
+    .alerts-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1.8rem 0;
+    }
+    .alert-stat {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.2rem;
+      text-align: center;
+      font-weight: 700;
+    }
+    .alert-stat span { font-size: 0.9rem; color: var(--muted); display: block; margin-top: 0.3rem; }
+
+    .add-alert-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 1.5rem 0;
+      cursor: pointer;
+    }
+
+    .alert-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.4rem;
+      margin: 1.2rem 0;
+      border-left: 4px solid var(--green);
+    }
+    .alert-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+    .alert-source { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.8rem; }
+    .alert-progress {
+      height: 8px;
+      background: var(--progress-bg);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.8rem 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      transition: width 0.8s ease;
+    }
+    .alert-target {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      margin-top: 0.6rem;
+    }
+  </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-    <nav class="p-5 flex justify-between items-center glass sticky top-0 z-[100] animate__animated animate__fadeInDown">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-xl shadow-lg rotate-3">F</div>
-            <span class="text-2xl font-black tracking-widest uppercase italic bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">FAIR</span>
-        </div>
-        <div id="user-info" class="text-xs font-bold text-indigo-300 bg-indigo-900/30 px-4 py-2 rounded-full border border-indigo-500/30">
-            جاري تهيئة Pi...
-        </div>
-    </nav>
+<!-- Pricing / Landing Page -->
+<div id="pricing" class="page active container">
+  <div class="hero">
+    <h1>SmartScout Pro</h1>
+    <p class="tagline">لا تدفع أكثر أبدًا مرة أخرى</p>
+  </div>
 
-    <header class="py-12 px-6 text-center animate__animated animate__zoomIn">
-        <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">
-            مساعدك <span class="text-indigo-500 italic">الذكي</span> <br>لأفضل الصفقات
-        </h1>
-        <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-            قارن الأسعار لحظياً في الطيران، الفنادق، وحتى الخدمات الطبية. ادفع بـ Pi واحصل على مميزات حصرية.
-        </p>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value">+40%</div>
+      <div class="stat-label">متوسط التوفير</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">$12M+</div>
+      <div class="stat-label">تم توفيرها</div>
+    </div>
+  </div>
 
-        <div class="max-w-5xl mx-auto glass p-4 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-            <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-600/20 blur-[100px]"></div>
+  <div class="plans">
+    <div class="plan-card">
+      <div class="plan-title">شهري</div>
+      <div class="price">3.2 π <small>/ شهر</small></div>
+      <button class="subscribe-btn" data-plan="monthly">اشترك شهريًا</button>
+    </div>
 
-            <div class="flex overflow-x-auto gap-3 p-2 no-scrollbar mb-6 scroll-smooth">
-                <button onclick="setTab('hotels', this)" class="active-tab flex items-center gap-3 px-8 py-4 rounded-2xl bg-slate-800 text-slate-400 font-bold transition-all shrink-0">
-                    <i data-lucide="hotel"></i> فنادق
-                </button>
-                <button onclick="setTab('flights', this)" class="flex items-center gap-3 px-8 py-4 rounded-2xl bg-slate-800 text-slate-400 font-bold transition-all shrink-0">
-                    <i data-lucide="plane"></i> طيران
-                </button>
-                <button onclick="setTab('cars', this)" class="flex items-center gap-3 px-8 py-4 rounded-2xl bg-slate-800 text-slate-400 font-bold transition-all shrink-0">
-                    <i data-lucide="car"></i> سيارات
-                </button>
-                <button onclick="setTab('realestate', this)" class="flex items-center gap-3 px-8 py-4 rounded-2xl bg-slate-800 text-slate-400 font-bold transition-all shrink-0">
-                    <i data-lucide="home"></i> عقارات
-                </button>
-                <button onclick="setTab('medical', this)" class="flex items-center gap-3 px-8 py-4 rounded-2xl bg-slate-800 text-slate-400 font-bold transition-all shrink-0">
-                    <i data-lucide="heart-pulse"></i> طبي
-                </button>
-            </div>
+    <div class="plan-card popular">
+      <div class="badge">الأكثر اختيارًا</div>
+      <div class="plan-title">سنوي</div>
+      <div class="price">1.92 π <small>/ شهر</small></div>
+      <div class="savings">توفير 40%</div>
+      <button class="subscribe-btn" data-plan="annual">اشترك سنويًا</button>
+    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-2">
-                <div class="md:col-span-8 relative">
-                    <input id="searchInput" type="text" placeholder="ماذا تريد أن تبحث عنه اليوم؟" 
-                    class="search-input w-full bg-slate-900/50 border border-slate-700 p-5 rounded-3xl outline-none text-xl transition-all">
-                </div>
-                <button onclick="startSearch()" class="md:col-span-4 btn-glow bg-gradient-to-r from-indigo-600 to-purple-600 p-5 rounded-3xl font-black text-xl flex items-center justify-center gap-3 transition-all duration-300">
-                    <i data-lucide="search"></i> بحث عادل
-                </button>
-            </div>
-        </div>
-    </header>
+    <div class="plan-card">
+      <div class="plan-title">مدى الحياة</div>
+      <div class="price">47.8 π <small>مرة واحدة</small></div>
+      <div class="savings">بدون تجديد</div>
+      <button class="subscribe-btn" data-plan="lifetime">اشترك مدى الحياة</button>
+    </div>
+  </div>
 
-    <main id="main-view" class="max-w-5xl mx-auto px-6 pb-24">
-        
-        <div id="upgrade-card" class="glass p-8 rounded-[2rem] border-indigo-500/30 flex flex-col md:flex-row justify-between items-center gap-6 animate__animated animate__fadeInUp">
-            <div class="text-right">
-                <span class="pi-badge px-3 py-1 rounded-md text-[10px] uppercase mb-2 inline-block">عضوية FAIR+</span>
-                <h3 class="text-2xl font-black mb-2">فعل محرك البحث الكامل</h3>
-                <p class="text-slate-400 text-sm">احصل على وصول لـ 100+ مصدر عالمي وقارن الأسعار بدقة 100%.</p>
-            </div>
-            <button id="pay-btn" onclick="startPiProcess()" class="bg-white text-black px-10 py-5 rounded-3xl font-black hover:scale-105 transition-all flex items-center gap-2" disabled>
-                <span class="text-xs">ادفع الآن</span> 1.0 π
-            </button>
-        </div>
+  <!-- Features Table -->
+  <div class="features-table" style="background:var(--card); border-radius:16px; padding:1.8rem; margin:2.5rem 0;">
+    <h2 style="text-align:center; margin-bottom:1.2rem;">المميزات</h2>
+    <table style="width:100%; border-collapse:collapse;">
+      <tr><th></th><th>مجاني</th><th>Pro</th></tr>
+      <tr><td>تنبيهات انخفاض السعر</td><td>3 شهريًا</td><td>غير محدود</td></tr>
+      <tr><td>توقعات الذكاء الاصطناعي</td><td>أساسية</td><td>متقدمة</td></tr>
+      <tr><td>سجل الأسعار</td><td>30 يوم</td><td>سنتين</td></tr>
+      <tr><td>إشعارات فورية</td><td>✗</td><td>✓</td></tr>
+      <tr><td>جميع الفئات</td><td>✗</td><td>✓</td></tr>
+      <tr><td>بدون إعلانات</td><td>✗</td><td>✓</td></tr>
+    </table>
+  </div>
 
-        <div id="results-area" class="mt-12 hidden animate__animated animate__fadeIn">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-black flex items-center gap-2">
-                    <span class="w-2 h-8 bg-indigo-500 rounded-full"></span> 
-                    أفضل عروض <span id="current-cat-text" class="text-indigo-400">الفنادق</span>
-                </h2>
-                <span class="text-xs text-green-400 animate-pulse">● تحديث مباشر للأسعار</span>
-            </div>
-            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                </div>
-        </div>
-    </main>
+  <!-- FAQ -->
+  <div class="faq">
+    <h2 style="text-align:center; margin:2.5rem 0 1.5rem;">الأسئلة الشائعة</h2>
+    
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.nextElementSibling.classList.toggle('show')">هل يوجد فترة تجريبية مجانية؟<span>▼</span></div>
+      <div class="faq-a">نعم، 7 أيام تجريبية كاملة المميزات.</div>
+    </div>
+    <!-- أضف باقي الأسئلة بنفس الطريقة -->
+  </div>
+</div>
 
-    <script>
-        lucide.createIcons();
-        const payBtn = document.getElementById('pay-btn');
-        const userInfo = document.getElementById('user-info');
-        let currentUser = null;
+<!-- Tracker / Alerts Page -->
+<div id="tracker" class="page container">
+  <div class="tracker-header">
+    <h1 class="tracker-title">My Tracker</h1>
+    <p class="tracker-subtitle">4 تنبيهات نشطة • 4 صفقات تم توفيرها</p>
+  </div>
 
-        // --- تهيئة Pi Network ---
-        async function initPi() {
-            try {
-                if (typeof Pi === 'undefined') throw new Error("افتح التطبيق في Pi Browser");
-                await Pi.init({ version: "2.0", sandbox: true });
-                const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
-                currentUser = auth.user;
-                payBtn.disabled = false;
-                userInfo.innerText = "مرحباً: " + currentUser.username;
-            } catch (err) {
-                userInfo.innerText = "وضع الزائر (يرجى استخدام Pi Browser)";
-                userInfo.classList.add('text-red-400');
-            }
-        }
+  <div class="alerts-stats">
+    <div class="alert-stat"><strong>4</strong><span>نشط</span></div>
+    <div class="alert-stat"><strong>1</strong><span>تم الوصول</span></div>
+    <div class="alert-stat"><strong>5</strong><span>إجمالي</span></div>
+  </div>
 
-        function setTab(category, btn) {
-            document.querySelectorAll('button').forEach(b => b.classList.remove('active-tab'));
-            btn.classList.add('active-tab');
-            const catNames = { 'hotels': 'فنادق', 'flights': 'طيران', 'cars': 'سيارات', 'realestate': 'عقارات', 'medical': 'خدمات طبية' };
-            document.getElementById('searchInput').placeholder = `ابحث عن ${catNames[category]}...`;
-            document.getElementById('current-cat-text').innerText = catNames[category];
-        }
+  <button class="add-alert-btn">+ إضافة تنبيه سعر جديد</button>
 
-        function startSearch() {
-            const grid = document.getElementById('results-grid');
-            document.getElementById('results-area').classList.remove('hidden');
-            grid.innerHTML = `<div class="col-span-full py-20 text-center animate-pulse text-indigo-300">جارٍ فحص قواعد البيانات العالمية...</div>`;
-            
-            setTimeout(() => {
-                grid.innerHTML = `
-                    <div class="glass p-6 rounded-3xl border-l-8 border-indigo-500 hover:bg-white/5 transition-all animate__animated animate__fadeInLeft">
-                        <div class="flex justify-between items-start mb-4">
-                            <h4 class="font-black text-xl">عرض "Fair" الحصري</h4>
-                            <span class="bg-green-500/20 text-green-400 text-[10px] px-2 py-1 rounded">الأقل سعراً</span>
-                        </div>
-                        <p class="text-slate-400 text-sm mb-6 font-bold">هذا السعر متاح فقط لمستخدمي Pi Network لفترة محدودة.</p>
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <span class="text-xs text-slate-500 line-through block italic">1.2 Pi</span>
-                                <span class="text-3xl font-black text-white">0.8 <small class="text-xs font-normal">π</small></span>
-                            </div>
-                            <button class="bg-indigo-600 px-6 py-3 rounded-2xl text-xs font-black shadow-lg shadow-indigo-500/40">احجز الآن</button>
-                        </div>
-                    </div>
-                `;
-            }, 1500);
-        }
+  <!-- Example Alert -->
+  <div class="alert-card">
+    <div class="alert-title">Marriott Cancun – 4 ليالي</div>
+    <div class="alert-source">via Booking.com</div>
+    <div class="alert-progress"><div class="progress-fill" style="width:98%"></div></div>
+    <div class="alert-target">
+      <span>الهدف: $150</span>
+      <span>الحالي: $148</span>
+    </div>
+    <div style="margin-top:0.8rem; color:var(--green); font-weight:700;">تم الوصول للهدف!</div>
+  </div>
 
-        async function startPiProcess() {
-            // كود الدفع الخاص بك (الذي أرسلته سابقاً) مدمج هنا
-            try {
-                payBtn.innerText = "جاري الاتصال بالمحفظة...";
-                const payment = await Pi.createPayment({
-                    amount: 1.0,
-                    memo: "ترقية تطبيق FAIR للمستوى الاحترافي",
-                    metadata: { type: "premium_upgrade" }
-                }, {
-                    onReadyForServerApproval: (id) => console.log("Approved", id),
-                    onReadyForServerCompletion: (id, tx) => {
-                        alert("🎉 تم الترقية بنجاح!");
-                        payBtn.innerText = "تم التفعيل ✅";
-                        document.getElementById('upgrade-card').classList.add('border-green-500');
-                    },
-                    onCancel: () => payBtn.innerText = "ادفع الآن 1.0 π",
-                    onError: (err) => alert("خطأ: " + err.message)
-                });
-            } catch (err) { console.error(err); }
-        }
+  <!-- يمكن تكرار الكاردات حسب الحاجة -->
+</div>
 
-        function onIncompletePaymentFound(p) { console.log("Payment found", p); }
-        window.onload = initPi;
-    </script>
+<!-- Bottom Navigation -->
+<nav>
+  <a href="#" data-page="pricing" class="active"><span class="icon">🏠</span><span>الرئيسية</span></a>
+  <a href="#" data-page="tracker"><span class="icon">🔔</span><span>التنبيهات</span></a>
+  <a href="#"><span class="icon">👑</span><span>Premium</span></a>
+</nav>
+
+<script>
+  Pi.init({ version: "2.0", sandbox: true }); // غير إلى false للـ Mainnet
+
+  // تبديل الصفحات
+  document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const page = link.getAttribute('data-page');
+      if (!page) return;
+
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+  // دفع Pi
+  async function startPayment(plan) {
+    try {
+      const auth = await Pi.authenticate(['payments'], () => {});
+
+      const amount = plan === 'monthly' ? 3.2 : plan === 'annual' ? 23 : 47.8;
+
+      Pi.createPayment({
+        amount,
+        memo: `SmartScout Pro – ${plan}`,
+        metadata: { plan_type: plan }
+      }, {
+        onReadyForServerApproval: async (paymentId) => {
+          const res = await fetch('/api/approve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId })
+          });
+          if (!res.ok) throw new Error('فشل الموافقة');
+        },
+        onReadyForServerCompletion: async (paymentId, txid) => {
+          const res = await fetch('/api/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId, txid })
+          });
+          if (res.ok) {
+            alert('تم الاشتراك بنجاح! شكرًا لدعمك');
+          } else {
+            alert('فشل إكمال الدفع');
+          }
+        },
+        onCancel: () => alert('تم إلغاء الدفع'),
+        onError: err => alert('خطأ في الدفع: ' + err.message)
+      });
+    } catch (err) {
+      alert('فشل الربط مع Pi: ' + err.message);
+    }
+  }
+
+  // ربط الأزرار
+  document.querySelectorAll('.subscribe-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const plan = btn.getAttribute('data-plan');
+      startPayment(plan);
+    });
+  });
+</script>
+
 </body>
-</html>
+          </html>
