@@ -1,216 +1,144 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fair App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAIR - Pi Network App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
-<style>
-body {
-    margin:0;
-    font-family:sans-serif;
-    background: radial-gradient(circle,#2e1a47,#1a1a2e);
-    color:white;
-}
-
-/* Layout */
-.container { max-width:420px; margin:auto; padding:20px; }
-.card {
-    background:rgba(255,255,255,0.07);
-    backdrop-filter:blur(15px);
-    border-radius:25px;
-    padding:20px;
-    margin-top:20px;
-}
-
-/* Inputs */
-input {
-    width:100%;
-    padding:15px;
-    margin-top:10px;
-    border:none;
-    border-radius:10px;
-}
-
-/* Buttons */
-.btn {
-    width:100%;
-    padding:15px;
-    margin-top:15px;
-    border:none;
-    border-radius:12px;
-    background:linear-gradient(135deg,#6200ea,#b388ff);
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-/* Result */
-.result {
-    background:#222;
-    padding:15px;
-    border-radius:12px;
-    margin-top:10px;
-}
-</style>
+    <style>
+        :root {
+            --background: #0f172a; /* اللون الداكن من الكود اللي بعته */
+            --primary: #3b82f6;
+            --accent: #8b5cf6; /* البنفسجي المميز */
+            --card: #1e293b;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: #f1f5f9;
+            margin: 0;
+            padding-bottom: 80px; /* مساحة للـ Bottom Nav */
+        }
+        .gradient-hero {
+            background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 50%, #581c87 100%);
+        }
+        .search-input {
+            background: #1e293b;
+            border: 2px solid #334155;
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+            outline: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            transition: transform 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.95); }
+        .pi-card {
+            background: #1e293b;
+            border-radius: 1rem;
+            border: 1px solid #334155;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+    <header class="p-4 flex justify-between items-center border-b border-slate-800 bg-slate-900/50 sticky top-0 z-50 backdrop-blur-md">
+        <h1 class="text-2xl font-bold tracking-tighter text-white" style="font-family: 'Space Grotesk';">FAIR <span class="text-purple-500">🔍</span></h1>
+        <div id="user-status" class="text-sm bg-slate-800 px-3 py-1 rounded-full border border-slate-700">جاري الاتصال بـ Pi...</div>
+    </header>
 
-<!-- 🔐 LOGIN -->
-<div id="login" class="card">
-<h2>Fair 👋</h2>
-<p>سجل الدخول</p>
-
-<input id="username" placeholder="اسم المستخدم">
-<button class="btn" onclick="login()">دخول</button>
-</div>
-
-<!-- 🏠 APP -->
-<div id="app" style="display:none;">
-
-<div class="card">
-<h2>Fair 🔍</h2>
-
-<input id="search" placeholder="ابحث عن منتج...">
-<button class="btn" onclick="searchDeals()">بحث</button>
-
-<div id="results"></div>
-</div>
-
-<!-- 👤 PROFILE -->
-<div class="card">
-<h3>👤 الملف الشخصي</h3>
-<p id="userInfo"></p>
-<p>💎 الحالة: <span id="premiumStatus">Free</span></p>
-
-<button class="btn" onclick="connectPi()">ربط محفظة Pi</button>
-<button class="btn" onclick="subscribe()">اشتراك Premium (1 Pi / شهر)</button>
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-// 🔐 Login
-function login() {
-    const user = document.getElementById("username").value;
-    if (!user) return alert("ادخل اسم");
-
-    localStorage.setItem("user", user);
-    document.getElementById("login").style.display="none";
-    document.getElementById("app").style.display="block";
-
-    loadUser();
-}
-
-// 👤 Load user
-function loadUser() {
-    const user = localStorage.getItem("user");
-    const premium = localStorage.getItem("premium");
-
-    document.getElementById("userInfo").innerText = "👋 مرحباً " + user;
-    document.getElementById("premiumStatus").innerText = premium ? "Premium" : "Free";
-}
-
-// 🔎 Search (Demo)
-function searchDeals() {
-    const q = document.getElementById("search").value.toLowerCase();
-
-    const data = [
-        { name:"iPhone 13", price:1 },
-        { name:"Samsung S22", price:0.9 },
-        { name:"BMW X5", price:20 }
-    ];
-
-    const filtered = data.filter(x => x.name.toLowerCase().includes(q));
-
-    const results = document.getElementById("results");
-
-    if (!filtered.length) {
-        results.innerHTML = "❌ لا يوجد نتائج";
-        return;
-    }
-
-    filtered.sort((a,b)=>a.price-b.price);
-
-    results.innerHTML = filtered.map((item,i)=>`
-        <div class="result">
-            <h3>${item.name}</h3>
-            <p>${item.price} Pi ${i===0?"🔥 الأفضل":""}</p>
-            <button class="btn" onclick="buy('${item.name}', ${item.price})">شراء</button>
+    <main class="p-4 max-w-md mx-auto">
+        
+        <div class="gradient-hero rounded-3xl p-6 mb-8 text-center shadow-2xl">
+            <h2 class="text-xl font-semibold mb-2">ابحث عن أفضل العروض ذكياً</h2>
+            <p class="text-slate-300 text-sm mb-6">قارن الأسعار وادفع بعملة Pi بكل سهولة</p>
+            
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="ابحث عن iPhone, سيارات, فنادق..." 
+                       class="w-full search-input py-4 px-6 rounded-2xl text-white">
+                <button onclick="handleSearch()" class="mt-4 w-full btn-primary py-3 rounded-xl font-bold">Search</button>
+            </div>
         </div>
-    `).join("");
-}
 
-// 💳 Connect Pi
-async function connectPi() {
-    if (!window.Pi) return alert("افتح داخل Pi Browser");
+        <div id="results" class="space-y-4">
+            <div class="pi-card p-4 flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold">iPhone 13 - $700</span>
+                    <span class="text-yellow-400">⭐ Amazon</span>
+                </div>
+                <button onclick="startPayment(0.01)" class="btn-primary py-2 rounded-lg font-semibold">Choose & Pay with Pi</button>
+            </div>
+        </div>
 
-    Pi.init({ version:"2.0", sandbox:true });
+    </main>
 
-    const auth = await Pi.authenticate(['username','payments']);
-    alert("تم الربط: " + auth.user.username);
-}
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-3 flex justify-around items-center z-50">
+        <button class="text-purple-500 flex flex-col items-center"><span class="text-xs">Home</span></button>
+        <button class="text-slate-400 flex flex-col items-center"><span class="text-xs">Search</span></button>
+        <button class="text-slate-400 flex flex-col items-center"><span class="text-xs">Market</span></button>
+        <button class="text-slate-400 flex flex-col items-center"><span class="text-xs">Profile</span></button>
+    </nav>
 
-// 💰 Buy
-async function buy(item, price) {
-    await Pi.createPayment({
-        amount: price,
-        memo: "Buy " + item,
-        metadata: { item }
-    },{
-        onReadyForServerApproval: (id) => {
-            return fetch('/api/approve',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({paymentId:id})
-            });
-        },
-        onReadyForServerCompletion: (id,txid) => {
-            return fetch('/api/complete',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({paymentId:id,txid})
-            });
-        },
-        onCancel: ()=>alert("تم الإلغاء"),
-        onError: (e)=>alert(e.message)
-    });
+    <script>
+        // تهيئة Pi SDK
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: true }); // غير sandbox لـ false عند النشر الحقيقي
 
-    alert("✅ تم الدفع");
-}
+        async function auth() {
+            try {
+                const scopes = ['username', 'payments'];
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                document.getElementById('user-status').innerText = `أهلاً، ${auth.user.username}`;
+                console.log("Auth Success:", auth);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('user-status').innerText = "فشل تسجيل الدخول";
+            }
+        }
 
-// ⭐ Premium Subscription
-async function subscribe() {
-    await Pi.createPayment({
-        amount:1,
-        memo:"Fair Premium Subscription",
-        metadata:{type:"premium"}
-    },{
-        onReadyForServerApproval:(id)=>fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id})}),
-        onReadyForServerCompletion:(id,txid)=>fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id,txid})})
-    });
+        function onIncompletePaymentFound(payment) {
+            console.log("هناك عملية دفع لم تكتمل:", payment);
+        };
 
-    localStorage.setItem("premium", true);
-    loadUser();
-    alert("🔥 تم تفعيل Premium");
-}
+        async function startPayment(amount) {
+            try {
+                const payment = await Pi.createPayment({
+                    amount: amount,
+                    memo: "شراء عرض من تطبيق FAIR",
+                    metadata: { productId: "item_123" }
+                }, {
+                    onReadyForServerApproval: (paymentId) => {
+                        console.log("تم إنشاء الطلب، بانتظار موافقة السيرفر:", paymentId);
+                        // هنا بترسل الـ paymentId للسيرفر بتاعك (Vercel API)
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        console.log("تمت العملية بنجاح، TXID:", txid);
+                    },
+                    onCancel: (paymentId) => { console.log("تم إلغاء العملية"); },
+                    onError: (error, payment) => { console.error("خطأ في الدفع:", error); }
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
 
-// Auto login
-if (localStorage.getItem("user")) {
-    document.getElementById("login").style.display="none";
-    document.getElementById("app").style.display="block";
-    loadUser();
-}
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value;
+            if(query) {
+                alert("جاري البحث عن: " + query);
+                // هنا تقدر تضيف الأكواد اللي بتجيب النتائج فعلياً
+            }
+        }
 
-</script>
-
+        // تشغيل التوثيق عند فتح التطبيق
+        auth();
+    </script>
 </body>
 </html>
