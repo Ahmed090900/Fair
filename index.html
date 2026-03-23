@@ -1,137 +1,87 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAIR - Pi Network</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body {
-            background-color: #0f172a;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .status {
-            background: #334155;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        input {
-            width: 80%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: none;
-        }
-        button {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 90%;
-            margin-top: 10px;
-        }
-        .item-card {
-            border: 1px solid #475569;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            text-align: right;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>FAIR 🔍</h1>
-        <div id="status" class="status">جاري الاتصال بـ Pi SDK...</div>
-
-        <input type="text" id="search" placeholder="ابحث هنا...">
-        <button onclick="alert('جاري البحث...')">Search</button>
-
-        <div class="item-card">
-            <h3>iPhone 13</h3>
-            <p>السعر: 0.1 Pi</p>
-            <button onclick="pay(0.1)">Pay with Pi</button>
-        </div>
-    </div>
-
-    <script>
-        // 1. تهيئة الـ SDK
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true });
-
-        // 2. تسجيل الدخول تلقائياً
-        async function login() {
-            try {
-                const scopes = ['username', 'payments'];
-                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                document.getElementById('status').innerText = "متصل كـ: " + auth.user.username;
-                document.getElementById('status').style.color = "#4ade80";
-            } catch (err) {
-                document.getElementById('status').innerText = "خطأ: افتح التطبيق من Pi Browser";
-                document.getElementById('status').style.color = "#f87171";
-            }
-        }
-
-        // 3. التعامل مع المدفوعات المعلقة
-        function onIncompletePaymentFound(payment) {
-            console.log("هناك دفعة لم تكتمل:", payment.identifier);
-            // يمكنك هنا إرسال المعرف للسيرفر لإكمالها
-        };
-
-        // 4. دالة الدفع الأساسية (بسيطة ومباشرة)
-        async function pay(amount) {
-            try {
-                const payment = await Pi.createPayment({
-                    amount: amount,
-                    memo: "شراء منتج من FAIR",
-                    metadata: { productId: "item_1" }
-                }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        console.log("Approve this ID on server:", paymentId);
-                        // أرسل الطلب لمجلد api/approve
-                        fetch('/api/approve', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ paymentId })
-                        });
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        console.log("Complete this ID on server:", paymentId);
-                        // أرسل الطلب لمجلد api/complete
-                        fetch('/api/complete', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ paymentId, txid })
-                        });
-                        alert("تم الدفع بنجاح!");
-                    },
-                    onCancel: function(paymentId) { console.log("تم الإلغاء"); },
-                    onError: function(error, payment) { console.error("خطأ:", error); }
-                });
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        // تشغيل تسجيل الدخول
-        login();
-    </script>
+padding: 15px; border-radius: 10px; margin: 20px 0;">
+        <span style="font-size: 30px; color: #ffeb3b;">1.0</span> <small>Pi</small>
+    </div>
+    <button id="btn" class="btn-pay" onclick="startProcess()" disabled>جاري تهيئة الشبكة...</button>
+    <div id="status">الرجاء الانتظار...</div>
+</div>
+<script>
+    // تفعيل رسائل الخطأ للتصحيح في المتصفح
+    window.onerror = function(msg, url, line) {
+        alert("خطأ: " + msg + "\nالسطر: " + line);
+        return false;
+    };
+    const btn = document.getElementById('btn');
+    const status = document.getElementById('status');
+    let currentUser = null;
+    // 1. وظيفة التهيئة (تُستدعى عند اكتمال تحميل الصفحة)
+    async function initPi() {
+        try {
+            status.innerText = "جاري الاتصال بـ Pi Network...";
+            
+            // تأكد من وجود المكتبة
+            if (typeof Pi === 'undefined') {
+                throw new Error("لم يتم العثور على Pi SDK. تأكد من فتح الرابط داخل Pi Browser.");
+            }
+            // تهيئة الـ SDK (استخدم sandbox: true للتجربة)
+            await Pi.init({ version: "2.0", sandbox: true });
+            
+            // طلب الصلاحيات (Scope)
+            const scopes = ['username', 'payments', 'wallet_address'];
+            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+            
+            currentUser = auth.user;
+            btn.disabled = false;
+            btn.innerText = "ادفع الآن 1 Pi";
+            status.innerText = "مرحباً: " + currentUser.username;
+            
+        } catch (err) {
+            status.innerText = "فشل الاتصال: " + err.message;
+            status.style.color = "#ff5252";
+        }
+    }
+    // 2. معالجة عملية الدفع
+    async function startProcess() {
+        btn.disabled = true;
+        btn.innerText = "جاري فتح المحفظة...";
+        try {
+            const payment = await Pi.createPayment({
+                amount: 1.0,
+                memo: "تفعيل Smart Scout",
+                metadata: { user: currentUser.username }
+            }, {
+                onReadyForServerApproval: async (paymentId) => {
+                    return fetch('/api/approve', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId })
+                    });
+                },
+                onReadyForServerCompletion: async (paymentId, txid) => {
+                    return fetch('/api/complete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId, txid })
+                    });
+                },
+                onCancel: (paymentId) => { resetBtn(); status.innerText = "تم إلغاء الدفع"; },
+                onError: (error, payment) => { resetBtn(); status.innerText = "خطأ: " + error.message; }
+            });
+            status.innerText = "تم الدفع بنجاح! 🎉";
+            btn.innerText = "تم التفعيل ✅";
+        } catch (err) {
+            status.innerText = "فشل العملية: " + err.message;
+            resetBtn();
+        }
+    }
+    function resetBtn() {
+        btn.disabled = false;
+        btn.innerText = "ادفع الآن 1 Pi";
+    }
+    function onIncompletePaymentFound(payment) {
+        console.log("Incomplete payment found", payment);
+    }
+    // تشغيل التهيئة عند تحميل النافذة
+    window.onload = initPi;
+</script>
 </body>
 </html>
