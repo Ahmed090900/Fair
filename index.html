@@ -1,120 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FAIR - Pi Deals</title>
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<style>
-body, html{margin:0;padding:0;font-family:Arial;background:#020617;color:white}
-.header{padding:20px;text-align:center;font-size:28px;font-weight:bold}
-.hero{text-align:center;padding:30px}
-.search-box{display:flex;justify-content:center;gap:10px;margin:20px}
-.search-box input{padding:12px;width:60%;border-radius:10px;border:none}
-.search-box button{padding:12px 20px;border:none;border-radius:10px;background:#6366f1;color:white;cursor:pointer}
-.categories{display:flex;overflow-x:auto;gap:10px;padding:10px 20px}
-.cat{padding:8px 12px;background:#0f172a;border-radius:20px;cursor:pointer;transition:0.3s}
-.cat:hover{background:#6366f1}
-.cards{display:flex;overflow-x:auto;gap:15px;padding:20px}
-.card{min-width:220px;background:#0f172a;border-radius:15px;overflow:hidden;transition:0.3s;cursor:pointer}
-.card:hover{transform:scale(1.05)}
-.card img{width:100%;height:140px;object-fit:cover}
-.card-body{padding:10px}
-.price{color:#22c55e;font-weight:bold;margin-top:5px}
-button.pay{width:100%;padding:10px;border:none;background:#4f46e5;color:white;border-radius:10px;cursor:pointer}
-.status{text-align:center;margin:15px;color:#22c55e}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fair | Pi Payment</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background: radial-gradient(circle at center, #2e1a47 0%, #1a1a2e 100%);
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            font-family: sans-serif; color: white;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(15px);
+            border-radius: 30px; padding: 40px;
+            width: 90%; max-width: 400px; text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .btn-pay {
+            background: linear-gradient(135deg, #6200ea 0%, #b388ff 100%);
+            border: none; padding: 18px; width: 100%;
+            border-radius: 15px; color: white; font-weight: bold;
+            font-size: 18px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-pay:disabled { background: #444; cursor: not-allowed; opacity: 0.6; }
+        #status { margin-top: 20px; font-size: 14px; color: #ffeb3b; }
+    </style>
 </head>
 <body>
-<div class="header">🔥 FAIR</div>
-<div class="hero">
-<h1>Compare Prices. Pay in Pi</h1>
-<p>Hotels, Flights, Cars, Restaurants, Products</p>
-<div class="search-box">
-<input id="search" placeholder="Search deals...">
-<button onclick="search()">Search</button>
-</div>
-</div>
 
-<div class="categories">
-<div class="cat" onclick="filterCategory('Hotels')">🏨 Hotels</div>
-<div class="cat" onclick="filterCategory('Flights')">✈️ Flights</div>
-<div class="cat" onclick="filterCategory('Cars')">🚗 Cars</div>
-<div class="cat" onclick="filterCategory('Restaurants')">🍔 Restaurants</div>
-<div class="cat" onclick="filterCategory('Products')">🛍️ Products</div>
-</div>
+<div class="card">
+    <div style="font-size: 50px; margin-bottom: 10px;">π</div>
+    <h2>تفعيل Fair</h2>
+    <p>سيتم خصم 1 Pi لتفعيل المميزات</p>
+    
+    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 20px 0;">
+        <span style="font-size: 30px; color: #ffeb3b;">1.0</span> <small>Pi</small>
+    </div>
 
-<div class="cards" id="results"></div>
-<div id="status" class="status"></div>
+    <button id="btn" class="btn-pay" onclick="startProcess()" disabled>جاري تهيئة الشبكة...</button>
+    <div id="status">الرجاء الانتظار...</div>
+</div>
 
 <script>
-Pi.init({ version: "2.0" });
+    // تفعيل رسائل الخطأ للتصحيح في المتصفح
+    window.onerror = function(msg, url, line) {
+        alert("خطأ: " + msg + "\nالسطر: " + line);
+        return false;
+    };
 
-// تحويل الدولار إلى Pi
-const USD_TO_PI = 0.01;
+    const btn = document.getElementById('btn');
+    const status = document.getElementById('status');
+    let currentUser = null;
 
-// بيانات العروض
-const data = [
-{name:"Dubai Hotel",priceUSD:80,category:"Hotels",img:"https://images.unsplash.com/photo-1501117716987-c8e1ecb2108e"},
-{name:"Flight Cairo → Dubai",priceUSD:120,category:"Flights",img:"https://images.unsplash.com/photo-1549924231-f129b911e442"},
-{name:"BMW Rental",priceUSD:70,category:"Cars",img:"https://images.unsplash.com/photo-1503376780353-7e6692767b70"},
-{name:"Dinner Offer",priceUSD:25,category:"Restaurants",img:"https://images.unsplash.com/photo-1555992336-03a23c6c1e7b"},
-{name:"iPhone Deal",priceUSD:900,category:"Products",img:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9"}
-];
+    // 1. وظيفة التهيئة (تُستدعى عند اكتمال تحميل الصفحة)
+    async function initPi() {
+        try {
+            status.innerText = "جاري الاتصال بـ Pi Network...";
+            
+            // تأكد من وجود المكتبة
+            if (typeof Pi === 'undefined') {
+                throw new Error("لم يتم العثور على Pi SDK. تأكد من فتح الرابط داخل Pi Browser.");
+            }
 
-let currentData = [...data];
+            // تهيئة الـ SDK (استخدم sandbox: true للتجربة)
+            await Pi.init({ version: "2.0", sandbox: true });
+            
+            // طلب الصلاحيات (Scope)
+            const scopes = ['username', 'payments', 'wallet_address'];
+            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+            
+            currentUser = auth.user;
+            btn.disabled = false;
+            btn.innerText = "ادفع الآن 1 Pi";
+            status.innerText = "مرحباً: " + currentUser.username;
+            
+        } catch (err) {
+            status.innerText = "فشل الاتصال: " + err.message;
+            status.style.color = "#ff5252";
+        }
+    }
 
-function renderCards(list){
-const results = document.getElementById("results");
-results.innerHTML = "";
-let bestPricePi = Math.min(...list.map(x=>x.priceUSD*USD_TO_PI));
-list.forEach(item=>{
-let pricePi = (item.priceUSD*USD_TO_PI).toFixed(2);
-results.innerHTML += `
-<div class="card">
-<img src="${item.img}">
-<div class="card-body">
-<h4>${item.name}</h4>
-<p class="price">${pricePi} Pi ${pricePi==bestPricePi?'<span class="best">BEST</span>':''}</p>
-<button class="pay" onclick="pay('${item.name}',${pricePi})">Pay with Pi</button>
-</div>
-</div>
-`;
-});
-}
+    // 2. معالجة عملية الدفع
+    async function startProcess() {
+        btn.disabled = true;
+        btn.innerText = "جاري فتح المحفظة...";
 
-function filterCategory(cat){
-currentData = data.filter(x=>x.category==cat);
-renderCards(currentData);
-}
+        try {
+            const payment = await Pi.createPayment({
+                amount: 1.0,
+                memo: "تفعيل Smart Scout",
+                metadata: { user: currentUser.username }
+            }, {
+                onReadyForServerApproval: async (paymentId) => {
+                    return fetch('/api/approve', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId })
+                    });
+                },
+                onReadyForServerCompletion: async (paymentId, txid) => {
+                    return fetch('/api/complete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId, txid })
+                    });
+                },
+                onCancel: (paymentId) => { resetBtn(); status.innerText = "تم إلغاء الدفع"; },
+                onError: (error, payment) => { resetBtn(); status.innerText = "خطأ: " + error.message; }
+            });
 
-function search(){
-let query = document.getElementById("search").value.toLowerCase();
-currentData = data.filter(x=>x.name.toLowerCase().includes(query));
-renderCards(currentData);
-}
+            status.innerText = "تم الدفع بنجاح! 🎉";
+            btn.innerText = "تم التفعيل ✅";
+        } catch (err) {
+            status.innerText = "فشل العملية: " + err.message;
+            resetBtn();
+        }
+    }
 
-// دالة الدفع
-function pay(name, price){
-const status = document.getElementById("status");
-status.innerHTML = "⏳ Processing payment...";
-const paymentData = {amount:Number(price), memo:name, metadata:{product:name}};
-const callbacks = {
-onReadyForServerApproval: async(paymentId)=>{
-await fetch("/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId})});
-},
-onReadyForServerCompletion: async(paymentId, txid)=>{
-await fetch("/api/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId,txid})});
-status.innerHTML = `✅ Paid ${price} Pi successfully`;
-},
-onCancel: ()=>status.innerHTML="⚠️ Payment cancelled",
-onError: (e)=>status.innerHTML="❌ Payment error"
-};
-Pi.createPayment(paymentData, callbacks);
-}
+    function resetBtn() {
+        btn.disabled = false;
+        btn.innerText = "ادفع الآن 1 Pi";
+    }
 
-// INITIAL RENDER
-renderCards(currentData);
+    function onIncompletePaymentFound(payment) {
+        console.log("Incomplete payment found", payment);
+    }
+
+    // تشغيل التهيئة عند تحميل النافذة
+    window.onload = initPi;
 </script>
+
 </body>
 </html>
