@@ -3,200 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAIR - Pi Network Edition</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>FAIR - Pi Network</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
     <style>
-        :root {
-            --background: #0f172a;
-            --card: #1e293b;
-            --accent: #8b5cf6;
-        }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background);
-            color: #f1f5f9;
-            margin: 0;
-            padding-bottom: 80px;
+            background-color: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
         }
-        .gradient-hero {
-            background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 50%, #581c87 100%);
-        }
-        .search-input {
+        .container {
+            max-width: 400px;
+            margin: auto;
             background: #1e293b;
-            border: 2px solid #334155;
-            transition: all 0.3s;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .search-input:focus {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
-            outline: none;
+        .status {
+            background: #334155;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
         }
-        .btn-primary {
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+        }
+        button {
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            transition: transform 0.2s;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 90%;
+            margin-top: 10px;
         }
-        .btn-primary:active { transform: scale(0.95); }
-        .pi-card {
-            background: #1e293b;
-            border-radius: 1.25rem;
-            border: 1px solid #334155;
-            overflow: hidden;
+        .item-card {
+            border: 1px solid #475569;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: right;
         }
-        #user-status.success { background-color: rgba(22, 101, 52, 0.5); border-color: #16a34a; }
     </style>
 </head>
 <body>
 
-    <header class="p-4 flex justify-between items-center border-b border-slate-800 bg-slate-900/80 sticky top-0 z-50 backdrop-blur-md">
-        <h1 class="text-2xl font-bold text-white" style="font-family: 'Space Grotesk';">FAIR <span class="text-purple-500 text-lg">🔍</span></h1>
-        <div id="user-status" class="text-xs font-medium bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700 transition-colors">
-            جاري التحقق من Pi...
-        </div>
-    </header>
+    <div class="container">
+        <h1>FAIR 🔍</h1>
+        <div id="status" class="status">جاري الاتصال بـ Pi SDK...</div>
 
-    <main class="p-4 max-w-md mx-auto">
-        
-        <div class="gradient-hero rounded-[2rem] p-8 mb-8 text-center shadow-2xl border border-white/5">
-            <h2 class="text-2xl font-bold mb-3">ابحث عن أفضل العروض ذكياً</h2>
-            <p class="text-slate-300 text-sm mb-6 leading-relaxed">قارن الأسعار بين المتاجر الكبرى وادفع مباشرة بعملة Pi.</p>
-            
-            <div class="space-y-3">
-                <input type="text" id="searchInput" placeholder="ماذا تريد أن تشتري؟" 
-                       class="w-full search-input py-4 px-6 rounded-2xl text-white text-center">
-                <button onclick="handleSearch()" class="w-full btn-primary py-4 rounded-2xl font-bold text-lg shadow-lg">Search</button>
-            </div>
-        </div>
+        <input type="text" id="search" placeholder="ابحث هنا...">
+        <button onclick="alert('جاري البحث...')">Search</button>
 
-        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4 px-2">نتائج البحث المميزة</h3>
-        <div id="results" class="space-y-4">
-            
-            <div class="pi-card p-5">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h4 class="font-bold text-lg text-white">iPhone 13 - 128GB</h4>
-                        <span class="text-yellow-500 text-sm font-semibold italic">Amazon Global</span>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-white">$700</p>
-                        <p class="text-purple-400 text-xs font-medium">~ 20.5 Pi</p>
-                    </div>
-                </div>
-                <button onclick="startPayment(20.5)" class="w-full btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                    <span>Choose & Pay with Pi</span>
-                </button>
-            </div>
-
-            <div class="pi-card p-5 border-purple-500/30">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h4 class="font-bold text-lg text-white">iPhone 13 - 128GB 🔥</h4>
-                        <span class="text-green-400 text-sm font-semibold italic">Best Deal - eBay</span>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-white">$680</p>
-                        <p class="text-purple-400 text-xs font-medium">~ 19.8 Pi</p>
-                    </div>
-                </div>
-                <button onclick="startPayment(19.8)" class="w-full btn-primary py-3 rounded-xl font-bold shadow-indigo-500/20 shadow-xl">
-                    Choose & Pay with Pi
-                </button>
-            </div>
-
+        <div class="item-card">
+            <h3>iPhone 13</h3>
+            <p>السعر: 0.1 Pi</p>
+            <button onclick="pay(0.1)">Pay with Pi</button>
         </div>
-    </main>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 border-t border-slate-800 p-4 flex justify-around items-center backdrop-blur-lg">
-        <div class="flex flex-col items-center gap-1 text-purple-500">
-            <div class="w-5 h-5 bg-purple-500 rounded-sm opacity-80"></div>
-            <span class="text-[10px] font-bold">Home</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-slate-500 opacity-50">
-            <div class="w-5 h-5 bg-slate-500 rounded-sm opacity-80"></div>
-            <span class="text-[10px] font-bold">Search</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-slate-500 opacity-50">
-            <div class="w-5 h-5 bg-slate-500 rounded-sm opacity-80"></div>
-            <span class="text-[10px] font-bold">Market</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-slate-500 opacity-50">
-            <div class="w-5 h-5 bg-slate-500 rounded-sm opacity-80"></div>
-            <span class="text-[10px] font-bold">Profile</span>
-        </div>
-    </nav>
+    </div>
 
     <script>
+        // 1. تهيئة الـ SDK
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        async function auth() {
+        // 2. تسجيل الدخول تلقائياً
+        async function login() {
             try {
                 const scopes = ['username', 'payments'];
-                const authResult = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                
-                const statusDiv = document.getElementById('user-status');
-                statusDiv.innerText = `أهلاً، ${authResult.user.username}`;
-                statusDiv.classList.add('success');
-                console.log("Authenticated User:", authResult.user.username);
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                document.getElementById('status').innerText = "متصل كـ: " + auth.user.username;
+                document.getElementById('status').style.color = "#4ade80";
             } catch (err) {
-                console.error("Auth error:", err);
-                document.getElementById('user-status').innerText = "فشل الدخول - استخدم متصفح Pi";
+                document.getElementById('status').innerText = "خطأ: افتح التطبيق من Pi Browser";
+                document.getElementById('status').style.color = "#f87171";
             }
         }
 
-        async function onIncompletePaymentFound(payment) {
-            console.warn("Payment incomplete found:", payment.identifier);
-            // إخبار السيرفر بإنهاء المعاملة العالقة
-            await fetch('/api/complete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
-            });
-        }
+        // 3. التعامل مع المدفوعات المعلقة
+        function onIncompletePaymentFound(payment) {
+            console.log("هناك دفعة لم تكتمل:", payment.identifier);
+            // يمكنك هنا إرسال المعرف للسيرفر لإكمالها
+        };
 
-        async function startPayment(amount) {
+        // 4. دالة الدفع الأساسية (بسيطة ومباشرة)
+        async function pay(amount) {
             try {
                 const payment = await Pi.createPayment({
                     amount: amount,
-                    memo: "شراء iPhone 13 من FAIR",
-                    metadata: { type: "deal_purchase", internal_id: "fair_101" }
+                    memo: "شراء منتج من FAIR",
+                    metadata: { productId: "item_1" }
                 }, {
-                    onReadyForServerApproval: async (paymentId) => {
-                        console.log("Ready for Server Approval:", paymentId);
-                        const res = await fetch('/api/approve', {
+                    onReadyForServerApproval: function(paymentId) {
+                        console.log("Approve this ID on server:", paymentId);
+                        // أرسل الطلب لمجلد api/approve
+                        fetch('/api/approve', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify({ paymentId })
                         });
-                        if (res.ok) console.log("Payment Approved by Server");
                     },
-                    onReadyForServerCompletion: async (paymentId, txid) => {
-                        console.log("Ready for Completion. TXID:", txid);
-                        const res = await fetch('/api/complete', {
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        console.log("Complete this ID on server:", paymentId);
+                        // أرسل الطلب لمجلد api/complete
+                        fetch('/api/complete', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify({ paymentId, txid })
                         });
-                        if (res.ok) alert("🎉 مبروك! تمت عملية الدفع بنجاح.");
+                        alert("تم الدفع بنجاح!");
                     },
-                    onCancel: (paymentId) => { console.log("Payment Cancelled:", paymentId); },
-                    onError: (error, payment) => { console.error("Payment Error:", error); }
+                    onCancel: function(paymentId) { console.log("تم الإلغاء"); },
+                    onError: function(error, payment) { console.error("خطأ:", error); }
                 });
             } catch (err) {
-                console.error("Payment flow interrupted:", err);
+                console.error(err);
             }
         }
 
-        function handleSearch() {
-            const val = document.getElementById('searchInput').value;
-            if(val) alert("جاري البحث في قواعد البيانات عن: " + val);
-        }
-
-        // تشغيل التوثيق عند التحميل
-        auth();
+        // تشغيل تسجيل الدخول
+        login();
     </script>
 </body>
 </html>
