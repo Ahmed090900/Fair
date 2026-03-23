@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,32 +11,30 @@
 body {
     margin:0;
     font-family:sans-serif;
-    background: radial-gradient(circle at center, #2e1a47, #1a1a2e);
+    background: radial-gradient(circle,#2e1a47,#1a1a2e);
     color:white;
 }
 
-.container {
-    max-width:420px;
-    margin:auto;
-    padding:20px;
-}
-
+/* Layout */
+.container { max-width:420px; margin:auto; padding:20px; }
 .card {
-    background: rgba(255,255,255,0.07);
-    backdrop-filter: blur(15px);
+    background:rgba(255,255,255,0.07);
+    backdrop-filter:blur(15px);
     border-radius:25px;
-    padding:25px;
-    box-shadow:0 20px 40px rgba(0,0,0,0.4);
+    padding:20px;
+    margin-top:20px;
 }
 
+/* Inputs */
 input {
     width:100%;
     padding:15px;
+    margin-top:10px;
     border:none;
     border-radius:10px;
-    margin-top:10px;
 }
 
+/* Buttons */
 .btn {
     width:100%;
     padding:15px;
@@ -49,6 +47,7 @@ input {
     cursor:pointer;
 }
 
+/* Result */
 .result {
     background:#222;
     padding:15px;
@@ -61,102 +60,156 @@ input {
 <body>
 
 <div class="container">
+
+<!-- 🔐 LOGIN -->
+<div id="login" class="card">
+<h2>Fair 👋</h2>
+<p>سجل الدخول</p>
+
+<input id="username" placeholder="اسم المستخدم">
+<button class="btn" onclick="login()">دخول</button>
+</div>
+
+<!-- 🏠 APP -->
+<div id="app" style="display:none;">
+
 <div class="card">
-
 <h2>Fair 🔍</h2>
-<p>Find the best deals instantly</p>
 
-<input id="search" placeholder="Search for products, flights, hotels...">
-
-<button class="btn" onclick="searchDeals()">Search</button>
+<input id="search" placeholder="ابحث عن منتج...">
+<button class="btn" onclick="searchDeals()">بحث</button>
 
 <div id="results"></div>
-
-<div id="paymentBox" style="display:none;">
-    <h3>Best Deal 🎉</h3>
-    <p id="selectedItem"></p>
-
-    <button class="btn" onclick="startPayment()">Pay with Pi</button>
 </div>
 
-<p id="status"></p>
+<!-- 👤 PROFILE -->
+<div class="card">
+<h3>👤 الملف الشخصي</h3>
+<p id="userInfo"></p>
+<p>💎 الحالة: <span id="premiumStatus">Free</span></p>
+
+<button class="btn" onclick="connectPi()">ربط محفظة Pi</button>
+<button class="btn" onclick="subscribe()">اشتراك Premium (1 Pi / شهر)</button>
+</div>
 
 </div>
+
 </div>
 
 <script>
-let selectedDeal = null;
 
-// 🔍 Fake Search (تقدر تربطه API بعدين)
+// 🔐 Login
+function login() {
+    const user = document.getElementById("username").value;
+    if (!user) return alert("ادخل اسم");
+
+    localStorage.setItem("user", user);
+    document.getElementById("login").style.display="none";
+    document.getElementById("app").style.display="block";
+
+    loadUser();
+}
+
+// 👤 Load user
+function loadUser() {
+    const user = localStorage.getItem("user");
+    const premium = localStorage.getItem("premium");
+
+    document.getElementById("userInfo").innerText = "👋 مرحباً " + user;
+    document.getElementById("premiumStatus").innerText = premium ? "Premium" : "Free";
+}
+
+// 🔎 Search (Demo)
 function searchDeals() {
+    const q = document.getElementById("search").value.toLowerCase();
+
+    const data = [
+        { name:"iPhone 13", price:1 },
+        { name:"Samsung S22", price:0.9 },
+        { name:"BMW X5", price:20 }
+    ];
+
+    const filtered = data.filter(x => x.name.toLowerCase().includes(q));
+
     const results = document.getElementById("results");
 
-    results.innerHTML = `
-        <div class="result">
-            📱 iPhone 13 - $700 <br>
-            ⭐ Amazon
-            <br><br>
-            <button class="btn" onclick="selectDeal('iPhone 13 - $700')">Choose</button>
-        </div>
-
-        <div class="result">
-            📱 iPhone 13 - $680 🔥 <br>
-            ⭐ Best Deal
-            <br><br>
-            <button class="btn" onclick="selectDeal('Best Deal iPhone 13 - $680')">Choose</button>
-        </div>
-    `;
-}
-
-// 📊 اختيار عرض
-function selectDeal(item) {
-    selectedDeal = item;
-
-    document.getElementById("paymentBox").style.display = "block";
-    document.getElementById("selectedItem").innerText = item;
-}
-
-// 💳 الدفع باستخدام Pi
-async function startPayment() {
-    try {
-        if (!window.Pi) {
-            alert("Open in Pi Browser");
-            return;
-        }
-
-        Pi.init({ version: "2.0", sandbox: true });
-
-        await Pi.authenticate(['username', 'payments']);
-
-        await Pi.createPayment({
-            amount: 1,
-            memo: "Purchase via Fair",
-            metadata: { item: selectedDeal }
-        }, {
-            onReadyForServerApproval: (id) => {
-                return fetch('/api/approve', {
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({ paymentId:id })
-                });
-            },
-            onReadyForServerCompletion: (id, txid) => {
-                return fetch('/api/complete', {
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({ paymentId:id, txid })
-                });
-            },
-            onCancel: () => alert("Payment cancelled"),
-            onError: (err) => alert(err.message)
-        });
-
-        document.getElementById("status").innerText = "✅ Payment successful";
-
-    } catch(e) {
-        alert(e.message);
+    if (!filtered.length) {
+        results.innerHTML = "❌ لا يوجد نتائج";
+        return;
     }
+
+    filtered.sort((a,b)=>a.price-b.price);
+
+    results.innerHTML = filtered.map((item,i)=>`
+        <div class="result">
+            <h3>${item.name}</h3>
+            <p>${item.price} Pi ${i===0?"🔥 الأفضل":""}</p>
+            <button class="btn" onclick="buy('${item.name}', ${item.price})">شراء</button>
+        </div>
+    `).join("");
 }
+
+// 💳 Connect Pi
+async function connectPi() {
+    if (!window.Pi) return alert("افتح داخل Pi Browser");
+
+    Pi.init({ version:"2.0", sandbox:true });
+
+    const auth = await Pi.authenticate(['username','payments']);
+    alert("تم الربط: " + auth.user.username);
+}
+
+// 💰 Buy
+async function buy(item, price) {
+    await Pi.createPayment({
+        amount: price,
+        memo: "Buy " + item,
+        metadata: { item }
+    },{
+        onReadyForServerApproval: (id) => {
+            return fetch('/api/approve',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({paymentId:id})
+            });
+        },
+        onReadyForServerCompletion: (id,txid) => {
+            return fetch('/api/complete',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({paymentId:id,txid})
+            });
+        },
+        onCancel: ()=>alert("تم الإلغاء"),
+        onError: (e)=>alert(e.message)
+    });
+
+    alert("✅ تم الدفع");
+}
+
+// ⭐ Premium Subscription
+async function subscribe() {
+    await Pi.createPayment({
+        amount:1,
+        memo:"Fair Premium Subscription",
+        metadata:{type:"premium"}
+    },{
+        onReadyForServerApproval:(id)=>fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id})}),
+        onReadyForServerCompletion:(id,txid)=>fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id,txid})})
+    });
+
+    localStorage.setItem("premium", true);
+    loadUser();
+    alert("🔥 تم تفعيل Premium");
+}
+
+// Auto login
+if (localStorage.getItem("user")) {
+    document.getElementById("login").style.display="none";
+    document.getElementById("app").style.display="block";
+    loadUser();
+}
+
 </script>
 
 </body>
