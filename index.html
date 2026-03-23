@@ -4,78 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FAIR - Pi Deals</title>
-
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
 <style>
-
-/* RESET */
-body,html{margin:0;padding:0;box-sizing:border-box;font-family:Arial;background:#020617;color:white}
-
-/* HEADER */
-.header{padding:20px;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:24px;font-weight:bold}
-
-/* HERO */
-.hero{padding:30px 20px;text-align:center}
-.hero h1{font-size:28px;margin-bottom:10px}
-.hero p{margin-bottom:20px}
-
-/* SEARCH BOX */
-.search-box{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
-.search-box input{flex:1;padding:15px;border-radius:10px;border:none;min-width:180px}
-.search-box button{padding:15px 25px;border-radius:10px;border:none;background:#6366f1;color:white;cursor:pointer}
-
-/* CATEGORIES */
-.categories{display:flex;gap:10px;overflow-x:auto;padding:10px 20px;margin-bottom:20px}
-.cat{background:#0f172a;padding:10px 15px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:0.3s}
+body, html{margin:0;padding:0;font-family:Arial;background:#020617;color:white}
+.header{padding:20px;text-align:center;font-size:28px;font-weight:bold}
+.hero{text-align:center;padding:30px}
+.search-box{display:flex;justify-content:center;gap:10px;margin:20px}
+.search-box input{padding:12px;width:60%;border-radius:10px;border:none}
+.search-box button{padding:12px 20px;border:none;border-radius:10px;background:#6366f1;color:white;cursor:pointer}
+.categories{display:flex;overflow-x:auto;gap:10px;padding:10px 20px}
+.cat{padding:8px 12px;background:#0f172a;border-radius:20px;cursor:pointer;transition:0.3s}
 .cat:hover{background:#6366f1}
-
-/* SECTIONS */
-.section{padding:20px}
-.section h2{margin-bottom:15px}
-
-/* CARDS */
-.cards{display:flex;gap:15px;overflow-x:auto;padding-bottom:10px}
-.card{min-width:200px;background:#0f172a;border-radius:15px;overflow:hidden;transition:0.3s;cursor:pointer}
+.cards{display:flex;overflow-x:auto;gap:15px;padding:20px}
+.card{min-width:220px;background:#0f172a;border-radius:15px;overflow:hidden;transition:0.3s;cursor:pointer}
 .card:hover{transform:scale(1.05)}
-.card img{width:100%;height:120px;object-fit:cover}
+.card img{width:100%;height:140px;object-fit:cover}
 .card-body{padding:10px}
 .price{color:#22c55e;font-weight:bold;margin-top:5px}
-.best{background:#22c55e;padding:2px 6px;border-radius:6px;font-size:12px;margin-left:5px}
-
-/* PAY BUTTON */
-button.pay{margin-top:10px;padding:10px;width:100%;border:none;background:#4f46e5;color:white;border-radius:10px;cursor:pointer}
-
-/* STATUS */
-.status{text-align:center;margin:15px 0;color:#22c55e}
-
-/* SCROLL BAR */
-.cards::-webkit-scrollbar{height:6px}
-.cards::-webkit-scrollbar-thumb{background:#6366f1;border-radius:3px}
-
+button.pay{width:100%;padding:10px;border:none;background:#4f46e5;color:white;border-radius:10px;cursor:pointer}
+.status{text-align:center;margin:15px;color:#22c55e}
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<div class="header">
-<div class="logo">🔥 FAIR</div>
-<div>👤</div>
-</div>
-
-<!-- HERO -->
+<div class="header">🔥 FAIR</div>
 <div class="hero">
-<h1>Find Your Next Deal</h1>
+<h1>Compare Prices. Pay in Pi</h1>
 <p>Hotels, Flights, Cars, Restaurants, Products</p>
-
 <div class="search-box">
-<input id="search" placeholder="Search for deals...">
+<input id="search" placeholder="Search deals...">
 <button onclick="search()">Search</button>
 </div>
 </div>
 
-<!-- CATEGORIES -->
 <div class="categories">
 <div class="cat" onclick="filterCategory('Hotels')">🏨 Hotels</div>
 <div class="cat" onclick="filterCategory('Flights')">✈️ Flights</div>
@@ -84,19 +44,16 @@ button.pay{margin-top:10px;padding:10px;width:100%;border:none;background:#4f46e
 <div class="cat" onclick="filterCategory('Products')">🛍️ Products</div>
 </div>
 
-<!-- FEATURED -->
-<div class="section">
-<h2>🔥 Featured Deals</h2>
-<div id="results" class="cards"></div>
-</div>
-
+<div class="cards" id="results"></div>
 <div id="status" class="status"></div>
 
 <script>
 Pi.init({ version: "2.0" });
 
-const USD_TO_PI = 0.01; // مثال: 1 USD = 0.01 Pi (تقدر تغير حسب السعر)
+// تحويل الدولار إلى Pi
+const USD_TO_PI = 0.01;
 
+// بيانات العروض
 const data = [
 {name:"Dubai Hotel",priceUSD:80,category:"Hotels",img:"https://images.unsplash.com/photo-1501117716987-c8e1ecb2108e"},
 {name:"Flight Cairo → Dubai",priceUSD:120,category:"Flights",img:"https://images.unsplash.com/photo-1549924231-f129b911e442"},
@@ -111,7 +68,6 @@ function renderCards(list){
 const results = document.getElementById("results");
 results.innerHTML = "";
 let bestPricePi = Math.min(...list.map(x=>x.priceUSD*USD_TO_PI));
-
 list.forEach(item=>{
 let pricePi = (item.priceUSD*USD_TO_PI).toFixed(2);
 results.innerHTML += `
@@ -127,56 +83,38 @@ results.innerHTML += `
 });
 }
 
-// FILTER CATEGORY
 function filterCategory(cat){
 currentData = data.filter(x=>x.category==cat);
 renderCards(currentData);
 }
 
-// SEARCH
 function search(){
 let query = document.getElementById("search").value.toLowerCase();
 currentData = data.filter(x=>x.name.toLowerCase().includes(query));
 renderCards(currentData);
 }
 
-// PAYMENT
+// دالة الدفع
 function pay(name, price){
 const status = document.getElementById("status");
 status.innerHTML = "⏳ Processing payment...";
-
-const paymentData = {
-amount: Number(price),
-memo: name,
-metadata:{product:name}
-};
-
+const paymentData = {amount:Number(price), memo:name, metadata:{product:name}};
 const callbacks = {
-onReadyForServerApproval: async (paymentId)=>{
-await fetch("/api/approve",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({paymentId})
-});
+onReadyForServerApproval: async(paymentId)=>{
+await fetch("/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId})});
 },
-onReadyForServerCompletion: async (paymentId,txid)=>{
-await fetch("/api/complete",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({paymentId,txid})
-});
+onReadyForServerCompletion: async(paymentId, txid)=>{
+await fetch("/api/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId,txid})});
 status.innerHTML = `✅ Paid ${price} Pi successfully`;
 },
-onCancel: function(){status.innerHTML="⚠️ Payment cancelled"},
-onError: function(e){status.innerHTML="❌ Error occurred"; console.error(e)}
+onCancel: ()=>status.innerHTML="⚠️ Payment cancelled",
+onError: (e)=>status.innerHTML="❌ Payment error"
 };
-
-Pi.createPayment(paymentData,callbacks);
+Pi.createPayment(paymentData, callbacks);
 }
 
-// INIT
+// INITIAL RENDER
 renderCards(currentData);
-
 </script>
 </body>
 </html>
