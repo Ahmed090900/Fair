@@ -7,132 +7,99 @@
 
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
-/* BACKGROUND */
 body{
-background: radial-gradient(circle at top, #1e3a8a, #020617);
+margin:0;
+font-family:sans-serif;
+background:#020617;
 color:white;
-min-height:100vh;
-display:flex;
-justify-content:center;
-}
-
-/* CONTAINER */
-.container{
-width:100%;
-max-width:420px;
-padding:20px;
 }
 
 /* HEADER */
 .header{
+padding:30px;
 text-align:center;
-margin-top:40px;
-animation:fade 1s ease;
+font-size:28px;
+font-weight:bold;
 }
 
-.header h1{
-font-size:34px;
-font-weight:700;
-}
-
-.header p{
-opacity:0.7;
-margin-top:10px;
-}
-
-/* GLASS CARD */
-.card{
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(15px);
-border-radius:20px;
+/* SEARCH */
+.search-box{
 padding:20px;
-margin-top:25px;
-box-shadow:0 10px 30px rgba(0,0,0,0.3);
-animation:slideUp 0.8s ease;
+display:flex;
+gap:10px;
 }
 
-/* INPUT */
-input{
-width:100%;
-padding:14px;
+.search-box input{
+flex:1;
+padding:15px;
 border-radius:12px;
 border:none;
-outline:none;
-margin-top:10px;
-font-size:15px;
 }
 
-/* BUTTON */
-button{
-width:100%;
-padding:14px;
+.search-box button{
+padding:15px;
 border:none;
 border-radius:12px;
-background:linear-gradient(135deg,#6366f1,#4f46e5);
+background:#6366f1;
 color:white;
-font-weight:600;
-margin-top:15px;
-cursor:pointer;
-transition:0.3s;
-}
-
-button:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 20px rgba(99,102,241,0.4);
 }
 
 /* RESULTS */
 .results{
-margin-top:20px;
+padding:20px;
+display:flex;
+flex-direction:column;
+gap:15px;
 }
 
-.result{
-background:rgba(255,255,255,0.05);
-padding:15px;
+/* CARD */
+.card{
+background:#0f172a;
+padding:20px;
 border-radius:15px;
-margin-top:10px;
-animation:fade 0.5s ease;
+transition:0.3s;
+}
+
+.card:hover{
+transform:scale(1.02);
 }
 
 .price{
 color:#22c55e;
-font-weight:bold;
+font-size:18px;
 }
 
-.badge{
+.best{
 background:#22c55e;
-padding:3px 8px;
+padding:4px 8px;
 border-radius:6px;
 font-size:12px;
 margin-left:5px;
 }
 
-/* ANIMATIONS */
-@keyframes fade{
-from{opacity:0}
-to{opacity:1}
+/* BUTTON */
+.pay-btn{
+margin-top:10px;
+padding:10px;
+border:none;
+border-radius:10px;
+background:#4f46e5;
+color:white;
+width:100%;
 }
 
-@keyframes slideUp{
-from{
-opacity:0;
-transform:translateY(30px);
+/* STATUS */
+.status{
+text-align:center;
+margin-top:10px;
+color:#22c55e;
 }
-to{
-opacity:1;
-transform:translateY(0);
-}
+
+.loading{
+text-align:center;
+margin-top:20px;
 }
 
 </style>
@@ -140,58 +107,33 @@ transform:translateY(0);
 
 <body>
 
-<div class="container">
+<div class="header">🔥 FAIR</div>
 
-<div class="header">
-<h1>🔥 FAIR</h1>
-<p>Compare Prices. Find the Best Deal.</p>
-</div>
-
-<div class="card">
-<button onclick="login()">Login with Pi</button>
-</div>
-
-<div class="card">
-<h3>Search Deals</h3>
-<input id="search" placeholder="Flights, Hotels, Cars...">
+<div class="search-box">
+<input id="search" placeholder="Search anything...">
 <button onclick="search()">Search</button>
+</div>
 
 <div id="results" class="results"></div>
-</div>
 
-<div class="card">
-<h3>Premium</h3>
-<p>Unlock AI smart recommendations</p>
-<button onclick="subscribe()">Subscribe - 1 Pi</button>
-</div>
-
-</div>
+<div id="status" class="status"></div>
 
 <script>
 
 Pi.init({ version: "2.0" });
 
-async function login(){
-try{
-const scopes = ['username','payments'];
-const user = await Pi.authenticate(scopes);
-alert("Welcome " + user.user.username);
-}catch(e){
-console.error(e);
-}
-}
-
+/* SEARCH */
 function search(){
 
-const results = document.getElementById("results");
-results.innerHTML = "⏳ Searching...";
+let results = document.getElementById("results");
+results.innerHTML = "<div class='loading'>Searching...</div>";
 
 setTimeout(()=>{
 
 let data = [
-{name:"Dubai Flight",price:120,rating:4.5},
-{name:"Luxury Hotel",price:80,rating:4.2},
-{name:"BMW Rental",price:70,rating:4.6}
+{name:"Flight Cairo → Dubai",price:120},
+{name:"Hotel Marina",price:80},
+{name:"BMW Rental",price:70}
 ];
 
 let best = Math.min(...data.map(x=>x.price));
@@ -201,13 +143,15 @@ results.innerHTML = "";
 data.forEach(item=>{
 
 results.innerHTML += `
-<div class="result">
-<h4>${item.name}</h4>
-<p class="price">$${item.price}
-${item.price === best ? '<span class="badge">Best</span>' : ''}
-</p>
-<p>⭐ ${item.rating}</p>
-<button onclick="pay('${item.name}')">Pay with Pi</button>
+<div class="card">
+<h3>${item.name}</h3>
+<div class="price">
+$${item.price}
+${item.price===best?'<span class="best">BEST</span>':''}
+</div>
+<button class="pay-btn" onclick="pay('${item.name}',${item.price})">
+Pay with Pi
+</button>
 </div>
 `;
 
@@ -217,7 +161,11 @@ ${item.price === best ? '<span class="badge">Best</span>' : ''}
 
 }
 
-function pay(name){
+/* PAYMENT */
+function pay(name,price){
+
+let status = document.getElementById("status");
+status.innerHTML = "⏳ Processing payment...";
 
 const paymentData = {
 amount:1,
@@ -227,31 +175,67 @@ metadata:{product:name}
 
 const callbacks = {
 
-onReadyForServerApproval: (paymentId)=>{
-fetch("/api/approve",{
+/* APPROVE */
+onReadyForServerApproval: async function(paymentId){
+
+try{
+const res = await fetch("/api/approve",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({paymentId})
 });
+
+const data = await res.json();
+
+if(!data){
+throw new Error("Approve failed");
+}
+
+}catch(e){
+status.innerHTML = "❌ Approval failed";
+throw e;
+}
+
 },
 
-onReadyForServerCompletion: (paymentId,txid)=>{
-fetch("/api/complete",{
+/* COMPLETE */
+onReadyForServerCompletion: async function(paymentId,txid){
+
+try{
+const res = await fetch("/api/complete",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({paymentId,txid})
 });
-alert("✅ Payment Completed");
+
+const data = await res.json();
+
+if(!data){
+throw new Error("Complete failed");
+}
+
+status.innerHTML = "✅ Payment Successful";
+
+}catch(e){
+status.innerHTML = "❌ Payment failed";
+throw e;
+}
+
+},
+
+onCancel: function(){
+status.innerHTML = "⚠️ Payment cancelled";
+},
+
+onError: function(error){
+console.error(error);
+status.innerHTML = "❌ Error occurred";
 }
 
 };
 
 Pi.createPayment(paymentData,callbacks);
 
-}
-
-function subscribe(){
-pay("FAIR Premium");
 }
 
 </script>
