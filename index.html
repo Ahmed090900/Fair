@@ -91,9 +91,9 @@
         .shimmer {
             background: linear-gradient(90deg, #091328 0%, #141f38 50%, #091328 100%);
             background-size: 200% 100%;
-            animation: shimmer-animation 2s infinite linear;
+            animation: shimmer 2s infinite linear;
         }
-        @keyframes shimmer-animation {
+        @keyframes shimmer {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
         }
@@ -143,169 +143,142 @@
 </div>
 </nav>
 <script>
+    // --- Mock Data ---
+    const DEALS = [
+        { id: 1, category: 'Products', name: 'Sony XM5 Noise Cancelling', price: 12.50, oldPrice: 22.70, rating: 4.8, brand: 'Amazon Global', premium: true, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBw06Sc0HoicsBSO0gnQY2FsQCgq-lMkQFlCRu1eFvmgF8v4xRLVDDpwlF6ifWGLGmI42TWxYMOpKOM4LzKxzzMf6R9FEbxYn7bpzABAcA236yDYGVaSs7F94iiyyWC1qMEfFXUejTZ6g2bH2Mjw44eHMUppjAbnuP4_pNq2sJEd9ney3BWwoYpbJ8BWiVOV0zCWobgdZGGFyKVyWsEERoEGrnkbVkzwvyAjuJUzHMeqTPKKCfscQ3s45pxvuvdKrm_MR3er5fYzM4' },
+        { id: 2, category: 'Flights', name: 'Radisson Blue Bali (2N)', price: 45.00, oldPrice: 112.50, rating: 5.0, brand: 'Booking.com Exclusive', bestDeal: true, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbv9L_GZa4jZW9PWgFe8xKwMmQjukOO4Hq5qPxjMLBzGtjgY1tbEuvlNSDnvbq6eAgEO1iDMXRVwaL_uDFM7EaRWwpLXDcvXpWSKGBUhqlBRcVZheI3nURQJC0xm2QYNkhvc-90mQ9lhpjVMJp5T7xwbAJhqkwujjjfY606tq5jCsXmuKKo7ZWy1Q-Lzl5Bm93uzTG7wJi3b15U00pCPJTJuRNstFLFwipOU8YhJpW-lCkMlzcZ4cig7TKTIeDCTrmyi6AwkkPQUg' },
+        { id: 3, category: 'Products', name: 'MacBook Pro 16" M3 Max', price: 125.00, oldPrice: 135.00, rating: 4.9, brand: 'Apple', featured: true, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBisbxwja20OLK-mctb5j1tdXbi09FaocU12RxNHzM57HhIYAY-I7wLGm_DZv30ZLxtOTitTjlciyVel0FvuAA4PBgH48ITLnSOgtRJCYCjezdJdaWHQaZ4ccwEvFsK9CEQUlP_VvsxRIJcwlxxoSDa5Jyj5hcBUFk0Vcd3Q7OV32yvu9f-Q7Qi_dokTvogRH67n1wHpppLmhKQ7In4YYSvV3qtVLOof5CrlI9q0y2MACCj9dfUolMt1sPT_oEwT-NOBHTtRJfi1FU' },
+        { id: 4, category: 'Products', name: 'Quantum Quartz Watch', price: 8.25, oldPrice: 15.00, rating: 4.2, brand: 'E-Store', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA0xkfZoWdDOiyzLtLEx-KSXZy7gSkmNAx1vqIpmhZjF737__cQESrtOFZ2WAMm6Wh8daWOIv9YLQjN-kAobJLcIpaC8xMJAva5DapBfN_My3f0rmDqH-mrIZECzmBJHigW7ACqZDyF2ISHnbXiXysYx_FBEH9O-5BGLQZfWBhjo6kiZroGtOncRd_p1CjnyVYTimswVWT1cUCNWG7G3ctfeXKuOXcGl_g_8Q07atii9auvu_Z8MiXHsfu577l5sZmvM_ODoKe5D_c' },
+        { id: 5, category: 'Cars', name: 'Tesla Model S Plaid', price: 999.00, rating: 4.9, brand: 'Tesla', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCh4ZYa2UlRjjhx2c6MJFJmwMQNxjNyO5y_1TTwO0UW8cRlawUuTDbli9g8_D9Thbmhk9BOR4bemCEM3oipD4y2yD3tspU-EaKn5ymI4lRCWUGEQJI9jjBYOUiyZpcywv-P2uszKzp3Z1O03h9nnpx0GbtSV-_bff0J5IqhhrgV_3El78M6zBd96ctKTQZ06hsK5pXAjJCNA8FI6AcoBhLhOHuvwmkKludYVKYfTdUVJ10fVnOzw6oBMsBw817YtOdmUcn-yHXLkRI' }
+    ];
+
     // --- State Manager ---
     const app = {
         state: {
             user: { username: 'Alex.Pi', balance: 1240.85, points: 2450, level: 'Bronze' },
             isPremium: false,
             currentView: 'home',
-            history: [],
-            deals: [],
-            isLoading: false,
-            currentCategory: 'All',
-            searchTerm: ''
+            history: []
         },
 
         init() {
-            const saved = localStorage.getItem('fair_state_v2');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                this.state.user = parsed.user || this.state.user;
-                this.state.isPremium = parsed.isPremium || false;
-                this.state.history = parsed.history || [];
-            }
+            // Load from localStorage
+            const saved = localStorage.getItem('fair_state');
+            if (saved) this.state = JSON.parse(saved);
             
             this.initPi();
-            this.fetchData();
             this.switchView('home');
         },
 
-        async fetchData() {
-            this.state.isLoading = true;
-            this.renderView(this.state.currentView);
-
-            try {
-                // Fetch real products
-                const productRes = await fetch('https://fakestoreapi.com/products');
-                const products = await productRes.json();
-                
-                // Map products to internal format
-                const formattedProducts = products.map(p => ({
-                    id: `p-${p.id}`,
-                    category: 'Products',
-                    name: p.title,
-                    price: parseFloat((p.price / 10).toFixed(2)), // Convert to Pi-scale
-                    oldPrice: parseFloat((p.price / 10 * 1.5).toFixed(2)),
-                    rating: p.rating.rate,
-                    brand: 'Marketplace',
-                    image: p.image,
-                    premium: p.rating.rate > 4.5
-                }));
-
-                // Mock Fetch for other categories
-                const mockServices = await this.mockFetchServices();
-
-                this.state.deals = [...formattedProducts, ...mockServices];
-                this.state.isLoading = false;
-                this.renderView(this.state.currentView);
-            } catch (err) {
-                console.error("Data fetch failed", err);
-                this.state.isLoading = false;
-                this.showToast("Connection error. Using cache.", true);
-            }
-        },
-
-        async mockFetchServices() {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve([
-                        { id: 'f-1', category: 'Flights', name: 'First Class: Dubai to Tokyo', price: 45.20, rating: 5.0, brand: 'Emirates Pi', bestDeal: true, image: 'https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&w=800&q=80' },
-                        { id: 'h-1', category: 'Hotels', name: 'Viceroy Bali Resort (3N)', price: 112.00, oldPrice: 250.00, rating: 4.9, brand: 'Luxury Retreats', image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80' },
-                        { id: 'c-1', category: 'Cars', name: 'Tesla Model S Plaid 2024', price: 890.00, rating: 4.9, brand: 'Tesla Connect', image: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=800&q=80' },
-                        { id: 'f-2', category: 'Flights', name: 'Economy: London to New York', price: 8.50, rating: 4.2, brand: 'Virgin Atlantic', image: 'https://images.unsplash.com/photo-1542296332-2e4473faf563?auto=format&fit=crop&w=800&q=80' }
-                    ]);
-                }, 800);
-            });
-        },
-
         save() {
-            localStorage.setItem('fair_state_v2', JSON.stringify({
-                user: this.state.user,
-                isPremium: this.state.isPremium,
-                history: this.state.history
-            }));
+            localStorage.setItem('fair_state', JSON.stringify(this.state));
         },
 
         async initPi() {
             try {
+                // Pi SDK 2.0 Initialization
                 const Pi = window.Pi;
                 if (Pi) {
                     await Pi.init({ version: "2.0", sandbox: true });
                     const scopes = ['username', 'payments'];
-                    const onIncompletePaymentFound = (payment) => {};
+                    const onIncompletePaymentFound = (payment) => { /* Handle incomplete */ };
                     const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
                     if (auth) {
                         this.state.user.username = auth.user.username;
                         this.save();
+                        this.updateUI();
                     }
                 }
             } catch (err) {
-                console.warn("Pi SDK init failed");
+                console.warn("Pi SDK init failed or not in Pi Browser", err);
             }
+        },
+
+        updateUI() {
+            document.getElementById('user-avatar').src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuC7_Y14UVMU9MQGpXqHXgbfvOJyYB2trhZPzWoM-x1Q7MfoyoBlMYn8uowuQR3A42ZZJP7Z05NbPaoTwnpKvkLRg4znwzEvMODhekzo6MVF-Z5EiY9SI6MqiVHLFtk6mFNQzVUfwUVxWw4Rpls54nglyL7nk-uNYr5ID0iLo46iCviz69RJgXeg16RR7pXNAvdRLi3Y4livuAJ-LHtXOPcF5P4dD3GGdWOczsLz3wBwFwIFISDyYc7SnflxaRC-9B5ZorZh6Dg42kg';
         },
 
         showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
             const message = document.getElementById('toast-message');
             message.innerText = msg;
-            toast.classList.remove('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
             toast.classList.add('opacity-100', 'translate-y-0');
-            if (isError) toast.classList.add('border-error/40'); else toast.classList.remove('border-error/40');
+            if (isError) toast.classList.add('border-error/40');
+            else toast.classList.remove('border-error/40');
+            
             setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
                 toast.classList.remove('opacity-100', 'translate-y-0');
             }, 3000);
         },
 
         async buyItem(itemId, amount) {
-            this.showToast(`Paying ${amount} π...`);
+            this.showToast("Initializing Payment...");
             try {
                 const Pi = window.Pi;
-                if (!Pi) throw new Error("No SDK");
-                // Pi SDK Payment Logic (Mocked approval for this demo context)
-                this.processPurchase(itemId, amount);
-            } catch (err) {
-                this.processPurchase(itemId, amount);
-            }
-        },
+                if (!Pi) throw new Error("Pi SDK not available");
 
-        processPurchase(itemId, amount) {
-            this.state.user.balance -= amount;
-            this.state.user.points += Math.round(amount * 10);
-            this.state.history.push({ date: new Date().toLocaleDateString(), item: itemId, amount });
-            this.updateLevel();
-            this.save();
-            this.showToast("Success! Item secured in Vault.");
-            this.switchView('home');
+                const payment = await Pi.createPayment({
+                    amount: amount,
+                    memo: `Purchase for Item #${itemId}`,
+                    metadata: { itemId: itemId }
+                }, {
+                    onReadyForServerApproval: (paymentId) => {
+                        // Simulated endpoint
+                        return fetch('/api/approve', { method: 'POST', body: JSON.stringify({ paymentId }) });
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        // Simulated endpoint
+                        return fetch('/api/complete', { method: 'POST', body: JSON.stringify({ paymentId, txid }) });
+                    },
+                    onCancel: (paymentId) => this.showToast("Payment Cancelled"),
+                    onError: (error, payment) => this.showToast("Payment Error", true),
+                });
+
+                // Success logic
+                this.addPoints(amount * 10);
+                this.state.history.push({ date: new Date().toLocaleDateString(), item: itemId, amount });
+                this.state.user.balance -= amount;
+                this.save();
+                this.showToast("Success! Item purchased.");
+                this.switchView('home');
+            } catch (err) {
+                // Fallback for demo
+                this.addPoints(amount * 10);
+                this.state.user.balance -= amount;
+                this.save();
+                this.showToast("Demo: Purchase successful!");
+                this.switchView('home');
+            }
         },
 
         upgradePremium() {
             if (this.state.isPremium) return this.showToast("Already Premium!");
+            this.buyItem('PREMIUM', 1.0);
             this.state.isPremium = true;
-            this.state.user.balance -= 1.0;
             this.save();
-            this.showToast("Premium features unlocked!");
-            this.switchView('profile');
         },
 
-        updateLevel() {
-            const p = this.state.user.points;
-            if (p > 10000) this.state.user.level = 'Diamond';
-            else if (p > 5000) this.state.user.level = 'Platinum';
-            else if (p > 2000) this.state.user.level = 'Gold';
-            else this.state.user.level = 'Bronze';
+        addPoints(pts) {
+            this.state.user.points += Math.round(pts);
+            if (this.state.user.points > 10000) this.state.user.level = 'Diamond';
+            else if (this.state.user.points > 5000) this.state.user.level = 'Platinum';
+            else if (this.state.user.points > 2000) this.state.user.level = 'Gold';
+            this.save();
         },
 
         switchView(viewId) {
             const container = document.getElementById('app-content');
             container.style.opacity = '0';
+            
             setTimeout(() => {
                 this.state.currentView = viewId;
                 this.renderView(viewId);
                 this.updateNav(viewId);
                 container.style.opacity = '1';
                 window.scrollTo(0,0);
-            }, 200);
+            }, 300);
         },
 
         updateNav(viewId) {
@@ -323,29 +296,10 @@
             });
         },
 
-        renderSkeleton() {
-            return `
-                <div class="space-y-8 animate-pulse">
-                    <div class="h-48 w-full glass-card rounded-3xl shimmer"></div>
-                    <div class="flex gap-4 overflow-hidden">
-                        <div class="min-w-[280px] h-[360px] glass-card rounded-3xl shimmer"></div>
-                        <div class="min-w-[280px] h-[360px] glass-card rounded-3xl shimmer"></div>
-                    </div>
-                </div>
-            `;
-        },
-
         renderView(viewId) {
             const container = document.getElementById('app-content');
-            if (this.state.isLoading && (viewId === 'home' || viewId === 'search')) {
-                container.innerHTML = this.renderSkeleton();
-                return;
-            }
-
+            
             if (viewId === 'home') {
-                const recommended = this.state.deals.slice(0, 4);
-                const trending = this.state.deals.slice(4, 7);
-
                 container.innerHTML = `
                     <section class="relative">
                         <div class="glass-card p-8 rounded-3xl border-t border-white/10 shadow-2xl relative overflow-hidden group">
@@ -377,5 +331,7 @@
                             <span class="text-sm font-medium text-primary cursor-pointer" onclick="app.switchView('deals')">See all</span>
                         </div>
                         <div class="flex overflow-x-auto gap-6 pb-4 no-scrollbar -mx-6 px-6">
-                            ${recommended.map(deal => `
-                                <div class="min-w-[280px] group cursor-pointer" onclick="app.sw
+                            ${DEALS.slice(0, 3).map(deal => `
+                                <div class="min-w-[280px] group cursor-pointer" onclick="app.switchView('deals')">
+                                    <div class="relative h-[360px] rounded-3xl overflow-hidden mb-4">
+                           
