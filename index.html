@@ -1,127 +1,381 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Scout | Pi Payment</title>
-    <script src="
-https://sdk.minepi.com/pi-sdk.js
-"></script>
-    <style>
-        body {
-            margin: 0; padding: 0;
-            background: radial-gradient(circle at center, #2e1a47 0%, #1a1a2e 100%);
-            height: 100vh; display: flex; justify-content: center; align-items: center;
-            font-family: sans-serif; color: white;
-        }
-        .card {
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(15px);
-            border-radius: 30px; padding: 40px;
-            width: 90%; max-width: 400px; text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-        .btn-pay {
-            background: linear-gradient(135deg, #6200ea 0%, #b388ff 100%);
-            border: none; padding: 18px; width: 100%;
-            border-radius: 15px; color: white; font-weight: bold;
-            font-size: 18px; cursor: pointer; transition: 0.3s;
-        }
-        .btn-pay:disabled { background: #444; cursor: not-allowed; opacity: 0.6; }
-        #status { margin-top: 20px; font-size: 14px; color: #ffeb3b; }
-    </style>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fair - The Digital Vault</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Pi SDK 2.0 -->
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#0f1930",
+              "primary": "#95aaff",
+              "error": "#ff6e84",
+              "primary-dim": "#3567ff",
+              "tertiary-dim": "#efc900",
+              "primary-fixed-dim": "#6d8cff",
+              "secondary-container": "#9800d0",
+              "secondary-fixed": "#f0c1ff",
+              "tertiary-fixed-dim": "#efc900",
+              "on-primary-container": "#001b62",
+              "tertiary-fixed": "#ffd709",
+              "surface-container-highest": "#192540",
+              "error-container": "#a70138",
+              "on-error-container": "#ffb2b9",
+              "tertiary": "#ffe792",
+              "background": "#060e20",
+              "on-surface-variant": "#a3aac4",
+              "on-secondary-fixed-variant": "#8300b4",
+              "surface-dim": "#060e20",
+              "secondary": "#d575ff",
+              "on-primary-fixed-variant": "#002377",
+              "surface": "#060e20",
+              "outline": "#6d758c",
+              "on-tertiary-container": "#5b4b00",
+              "outline-variant": "#40485d",
+              "tertiary-container": "#ffd709",
+              "on-background": "#dee5ff",
+              "surface-bright": "#1f2b49",
+              "on-tertiary": "#655400",
+              "primary-container": "#819bff",
+              "inverse-surface": "#faf8ff",
+              "on-error": "#490013",
+              "on-tertiary-fixed": "#453900",
+              "on-secondary": "#390050",
+              "surface-container-low": "#091328",
+              "secondary-fixed-dim": "#eaaeff",
+              "surface-container-lowest": "#000000",
+              "error-dim": "#d73357",
+              "on-tertiary-fixed-variant": "#665500",
+              "on-secondary-container": "#fff5fc",
+              "on-primary": "#00257d",
+              "primary-fixed": "#819bff",
+              "surface-tint": "#95aaff",
+              "surface-container-high": "#141f38",
+              "secondary-dim": "#b90afc",
+              "on-secondary-fixed": "#58007a",
+              "inverse-primary": "#014dec",
+              "on-surface": "#dee5ff",
+              "on-primary-fixed": "#000000",
+              "surface-variant": "#192540",
+              "inverse-on-surface": "#4d556b"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .glass-card, .glass-panel {
+            background: rgba(9, 19, 40, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, #091328 0%, #141f38 50%, #091328 100%);
+            background-size: 200% 100%;
+            animation: shimmer-animation 2s infinite linear;
+        }
+        @keyframes shimmer-animation {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .view-transition { transition: opacity 0.3s ease; }
+        .diamond-glint { border-top: 1px solid rgba(255, 231, 146, 0.15); }
+    </style>
 </head>
-<body>
-<div class="card">
-    <div style="font-size: 50px; margin-bottom: 10px;">π</div>
-    <h2>تفعيل Smart Scout</h2>
-    <p>سيتم خصم 1 Pi لتفعيل المميزات</p>
-    
-    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 20px 0;">
-        <span style="font-size: 30px; color: #ffeb3b;">1.0</span> <small>Pi</small>
-    </div>
-    <button id="btn" class="btn-pay" onclick="startProcess()" disabled>جاري تهيئة الشبكة...</button>
-    <div id="status">الرجاء الانتظار...</div>
+<body class="bg-background text-on-surface font-body min-h-screen pb-32 overflow-x-hidden">
+<!-- Global Toast Notification -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl glass-card border border-primary/20 text-sm font-semibold shadow-2xl transition-all duration-500 opacity-0 translate-y-[-20px] pointer-events-none" id="toast">
+<span id="toast-message"></span>
 </div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#060e20]/80 backdrop-blur-xl shadow-[0px_24px_48px_rgba(0,37,125,0.08)] flex items-center justify-between px-6 h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary active:scale-95 transition-transform cursor-pointer" onclick="app.switchView('search')">search</span>
+<h1 class="font-headline font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-primary to-secondary text-2xl">Fair</h1>
+</div>
+<div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden active:scale-95 transition-transform cursor-pointer" onclick="app.switchView('profile')">
+<img alt="User Profile" id="user-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSiR5NyEcT0RDK5kXvXj9bczRoAuIOXnRdp-WuUKDSr50mA0zE9ypep78ajCqxyvX9Vx7TFnxeG0I-s-tNYEMC-1XHty44NOKSkt5W9ssMxuI-1rTGlpiqFyKJ-B1N8_wPBY77O775NwyCC4yiuzdDaYg73p9xiwmwfQNC0QSmvxN2ad6DPXTpFc8ulN3UI5g8Po6lPo1piZcnF3deAc1FlSFhB8hsMoYEwjYlD5I5Qqch9hNo3qzAnktx3tNgV63OFE2GNoXH0-o"/>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-5xl mx-auto space-y-10 view-transition" id="app-content">
+<!-- Views will be injected here -->
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50">
+<div class="bg-[#060e20]/60 backdrop-blur-3xl border-t border-[#40485d]/15 px-4 pb-8 pt-2 flex justify-around items-center rounded-t-[1.5rem] shadow-[0px_-10px_40px_rgba(0,0,0,0.5)]">
+<button class="nav-item flex flex-col items-center justify-center p-3 transition-all duration-200" data-view="home" onclick="app.switchView('home')">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest mt-1">Home</span>
+</button>
+<button class="nav-item flex flex-col items-center justify-center p-3 text-[#40485d] transition-all duration-200" data-view="search" onclick="app.switchView('search')">
+<span class="material-symbols-outlined">search</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest mt-1">Explore</span>
+</button>
+<button class="nav-item flex flex-col items-center justify-center p-3 text-[#40485d] transition-all duration-200" data-view="deals" onclick="app.switchView('deals')">
+<span class="material-symbols-outlined">local_offer</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest mt-1">Offers</span>
+</button>
+<button class="nav-item flex flex-col items-center justify-center p-3 text-[#40485d] transition-all duration-200" data-view="profile" onclick="app.switchView('profile')">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest mt-1">Account</span>
+</button>
+</div>
+</nav>
 <script>
-    // تفعيل رسائل الخطأ للتصحيح في المتصفح
-    window.onerror = function(msg, url, line) {
-        alert("خطأ: " + msg + "\nالسطر: " + line);
-        return false;
-    };
-    const btn = document.getElementById('btn');
-    const status = document.getElementById('status');
-    let currentUser = null;
-    // 1. وظيفة التهيئة (تُستدعى عند اكتمال تحميل الصفحة)
-    async function initPi() {
-        try {
-            status.innerText = "جاري الاتصال بـ Pi Network...";
-            
-            // تأكد من وجود المكتبة
-            if (typeof Pi === 'undefined') {
-                throw new Error("لم يتم العثور على Pi SDK. تأكد من فتح الرابط داخل Pi Browser.");
-            }
-            // تهيئة الـ SDK (استخدم sandbox: true للتجربة)
-            await Pi.init({ version: "2.0", sandbox: true });
-            
-            // طلب الصلاحيات (Scope)
-            const scopes = ['username', 'payments', 'wallet_address'];
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            
-            currentUser = auth.user;
-            btn.disabled = false;
-            btn.innerText = "ادفع الآن 1 Pi";
-            status.innerText = "مرحباً: " + currentUser.username;
-            
-        } catch (err) {
-            status.innerText = "فشل الاتصال: " + err.message;
-            status.style.color = "#ff5252";
-        }
-    }
-    // 2. معالجة عملية الدفع
-    async function startProcess() {
-        btn.disabled = true;
-        btn.innerText = "جاري فتح المحفظة...";
-        try {
-            const payment = await Pi.createPayment({
-                amount: 1.0,
-                memo: "تفعيل Smart Scout",
-                metadata: { user: currentUser.username }
-            }, {
-                onReadyForServerApproval: async (paymentId) => {
-                    return fetch('/api/approve', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId })
-                    });
-                },
-                onReadyForServerCompletion: async (paymentId, txid) => {
-                    return fetch('/api/complete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId, txid })
-                    });
-                },
-                onCancel: (paymentId) => { resetBtn(); status.innerText = "تم إلغاء الدفع"; },
-                onError: (error, payment) => { resetBtn(); status.innerText = "خطأ: " + error.message; }
-            });
-            status.innerText = "تم الدفع بنجاح! 🎉";
-            btn.innerText = "تم التفعيل ✅";
-        } catch (err) {
-            status.innerText = "فشل العملية: " + err.message;
-            resetBtn();
-        }
-    }
-    function resetBtn() {
-        btn.disabled = false;
-        btn.innerText = "ادفع الآن 1 Pi";
-    }
-    function onIncompletePaymentFound(payment) {
-        console.log("Incomplete payment found", payment);
-    }
-    // تشغيل التهيئة عند تحميل النافذة
-    window.onload = initPi;
-</script>
-</body>
-</html>
+    // --- State Manager ---
+    const app = {
+        state: {
+            user: { username: 'Alex.Pi', balance: 1240.85, points: 2450, level: 'Bronze' },
+            isPremium: false,
+            currentView: 'home',
+            history: [],
+            deals: [],
+            isLoading: false,
+            currentCategory: 'All',
+            searchTerm: ''
+        },
+
+        init() {
+            const saved = localStorage.getItem('fair_state_v2');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                this.state.user = parsed.user || this.state.user;
+                this.state.isPremium = parsed.isPremium || false;
+                this.state.history = parsed.history || [];
+            }
+            
+            this.initPi();
+            this.fetchData();
+            this.switchView('home');
+        },
+
+        async fetchData() {
+            this.state.isLoading = true;
+            this.renderView(this.state.currentView);
+
+            try {
+                // Fetch real products
+                const productRes = await fetch('https://fakestoreapi.com/products');
+                const products = await productRes.json();
+                
+                // Map products to internal format
+                const formattedProducts = products.map(p => ({
+                    id: `p-${p.id}`,
+                    category: 'Products',
+                    name: p.title,
+                    price: parseFloat((p.price / 10).toFixed(2)), // Convert to Pi-scale
+                    oldPrice: parseFloat((p.price / 10 * 1.5).toFixed(2)),
+                    rating: p.rating.rate,
+                    brand: 'Marketplace',
+                    image: p.image,
+                    premium: p.rating.rate > 4.5
+                }));
+
+                // Mock Fetch for other categories
+                const mockServices = await this.mockFetchServices();
+
+                this.state.deals = [...formattedProducts, ...mockServices];
+                this.state.isLoading = false;
+                this.renderView(this.state.currentView);
+            } catch (err) {
+                console.error("Data fetch failed", err);
+                this.state.isLoading = false;
+                this.showToast("Connection error. Using cache.", true);
+            }
+        },
+
+        async mockFetchServices() {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve([
+                        { id: 'f-1', category: 'Flights', name: 'First Class: Dubai to Tokyo', price: 45.20, rating: 5.0, brand: 'Emirates Pi', bestDeal: true, image: 'https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&w=800&q=80' },
+                        { id: 'h-1', category: 'Hotels', name: 'Viceroy Bali Resort (3N)', price: 112.00, oldPrice: 250.00, rating: 4.9, brand: 'Luxury Retreats', image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80' },
+                        { id: 'c-1', category: 'Cars', name: 'Tesla Model S Plaid 2024', price: 890.00, rating: 4.9, brand: 'Tesla Connect', image: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=800&q=80' },
+                        { id: 'f-2', category: 'Flights', name: 'Economy: London to New York', price: 8.50, rating: 4.2, brand: 'Virgin Atlantic', image: 'https://images.unsplash.com/photo-1542296332-2e4473faf563?auto=format&fit=crop&w=800&q=80' }
+                    ]);
+                }, 800);
+            });
+        },
+
+        save() {
+            localStorage.setItem('fair_state_v2', JSON.stringify({
+                user: this.state.user,
+                isPremium: this.state.isPremium,
+                history: this.state.history
+            }));
+        },
+
+        async initPi() {
+            try {
+                const Pi = window.Pi;
+                if (Pi) {
+                    await Pi.init({ version: "2.0", sandbox: true });
+                    const scopes = ['username', 'payments'];
+                    const onIncompletePaymentFound = (payment) => {};
+                    const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                    if (auth) {
+                        this.state.user.username = auth.user.username;
+                        this.save();
+                    }
+                }
+            } catch (err) {
+                console.warn("Pi SDK init failed");
+            }
+        },
+
+        showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const message = document.getElementById('toast-message');
+            message.innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            if (isError) toast.classList.add('border-error/40'); else toast.classList.remove('border-error/40');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        },
+
+        async buyItem(itemId, amount) {
+            this.showToast(`Paying ${amount} π...`);
+            try {
+                const Pi = window.Pi;
+                if (!Pi) throw new Error("No SDK");
+                // Pi SDK Payment Logic (Mocked approval for this demo context)
+                this.processPurchase(itemId, amount);
+            } catch (err) {
+                this.processPurchase(itemId, amount);
+            }
+        },
+
+        processPurchase(itemId, amount) {
+            this.state.user.balance -= amount;
+            this.state.user.points += Math.round(amount * 10);
+            this.state.history.push({ date: new Date().toLocaleDateString(), item: itemId, amount });
+            this.updateLevel();
+            this.save();
+            this.showToast("Success! Item secured in Vault.");
+            this.switchView('home');
+        },
+
+        upgradePremium() {
+            if (this.state.isPremium) return this.showToast("Already Premium!");
+            this.state.isPremium = true;
+            this.state.user.balance -= 1.0;
+            this.save();
+            this.showToast("Premium features unlocked!");
+            this.switchView('profile');
+        },
+
+        updateLevel() {
+            const p = this.state.user.points;
+            if (p > 10000) this.state.user.level = 'Diamond';
+            else if (p > 5000) this.state.user.level = 'Platinum';
+            else if (p > 2000) this.state.user.level = 'Gold';
+            else this.state.user.level = 'Bronze';
+        },
+
+        switchView(viewId) {
+            const container = document.getElementById('app-content');
+            container.style.opacity = '0';
+            setTimeout(() => {
+                this.state.currentView = viewId;
+                this.renderView(viewId);
+                this.updateNav(viewId);
+                container.style.opacity = '1';
+                window.scrollTo(0,0);
+            }, 200);
+        },
+
+        updateNav(viewId) {
+            document.querySelectorAll('.nav-item').forEach(el => {
+                const v = el.getAttribute('data-view');
+                if (v === viewId) {
+                    el.classList.add('bg-gradient-to-br', 'from-primary/20', 'to-secondary/20', 'text-[#dee5ff]', 'rounded-[1.5rem]', 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]');
+                    el.classList.remove('text-[#40485d]');
+                    el.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1";
+                } else {
+                    el.classList.remove('bg-gradient-to-br', 'from-primary/20', 'to-secondary/20', 'text-[#dee5ff]', 'rounded-[1.5rem]', 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]');
+                    el.classList.add('text-[#40485d]');
+                    el.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
+                }
+            });
+        },
+
+        renderSkeleton() {
+            return `
+                <div class="space-y-8 animate-pulse">
+                    <div class="h-48 w-full glass-card rounded-3xl shimmer"></div>
+                    <div class="flex gap-4 overflow-hidden">
+                        <div class="min-w-[280px] h-[360px] glass-card rounded-3xl shimmer"></div>
+                        <div class="min-w-[280px] h-[360px] glass-card rounded-3xl shimmer"></div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderView(viewId) {
+            const container = document.getElementById('app-content');
+            if (this.state.isLoading && (viewId === 'home' || viewId === 'search')) {
+                container.innerHTML = this.renderSkeleton();
+                return;
+            }
+
+            if (viewId === 'home') {
+                const recommended = this.state.deals.slice(0, 4);
+                const trending = this.state.deals.slice(4, 7);
+
+                container.innerHTML = `
+                    <section class="relative">
+                        <div class="glass-card p-8 rounded-3xl border-t border-white/10 shadow-2xl relative overflow-hidden group">
+                            <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/20 rounded-full blur-[80px]"></div>
+                            <div class="flex justify-between items-start relative z-10">
+                                <div>
+                                    <span class="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant font-semibold">Current Portfolio</span>
+                                    <div class="flex items-baseline gap-2 mt-1">
+                                        <span class="font-headline text-4xl font-bold tracking-tight">${this.state.user.balance.toFixed(2)}</span>
+                                        <span class="font-headline text-xl text-primary font-bold">π</span>
+                                    </div>
+                                </div>
+                                <div class="bg-surface-bright/50 px-4 py-2 rounded-2xl border border-outline-variant/20 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                                    <span class="font-label text-xs font-bold text-on-surface">${this.state.user.level} Tier</span>
+                                </div>
+                            </div>
+                            <div class="mt-8 flex gap-8 relative z-10">
+                                <div><p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Loyalty Points</p><p class="font-headline font-bold text-lg">${this.state.user.points} <span class="text-xs text-on-surface-variant font-normal">pts</span></p></div>
+                                <div class="w-px h-10 bg-outline-variant/30"></div>
+                                <div><p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Growth</p><p class="font-headline font-bold text-lg text-primary">+12.4%</p></div>
+                            </div>
+                            <button class="mt-8 w-full py-4 rounded-2xl bg-gradient-to-r from-primary-dim to-secondary-dim text-on-primary font-headline font-bold text-sm tracking-wide shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">View Transaction History</button>
+                        </div>
+                    </section>
+                    <section>
+                        <div class="flex justify-between items-end mb-6">
+                            <div><span class="text-[10px] uppercase tracking-[0.3em] text-secondary font-bold">Curated</span><h2 class="font-headline text-2xl font-bold tracking-tight mt-1">Recommended for you</h2></div>
+                            <span class="text-sm font-medium text-primary cursor-pointer" onclick="app.switchView('deals')">See all</span>
+                        </div>
+                        <div class="flex overflow-x-auto gap-6 pb-4 no-scrollbar -mx-6 px-6">
+                            ${recommended.map(deal => `
+                                <div class="min-w-[280px] group cursor-pointer" onclick="app.sw
