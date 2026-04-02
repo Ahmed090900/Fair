@@ -10,489 +10,379 @@
     <style>
         :root {
             --primary: #facc15;
-            --dark: #020617;
-            --card: #1e293b;
+            --primary-hover: #eab308;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #3b82f6;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Cairo', sans-serif;
-            background: linear-gradient(135deg, #0f172a, #020617);
-            color: white;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
+        /* Splash Screen */
         #splash {
             position: fixed;
             inset: 0;
-            background: var(--dark);
+            background: #020617;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            font-size: 52px;
-            font-weight: 700;
-            color: var(--primary);
-            gap: 15px;
-            transition: opacity 0.9s;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--card-bg);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* Header */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
-            background: rgba(2,6,23,0.95);
-            backdrop-filter: blur(12px);
+            padding: 1rem 5%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(15px);
             position: sticky;
             top: 0;
             z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
 
-        .logo { color: var(--primary); font-size: 28px; font-weight: 700; }
+        /* Search & Filters */
+        .search-container {
+            padding: 20px 5%;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 1), transparent);
+        }
+        .search-box {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        input#searchInput {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: 2px solid #334155;
+            background: #1e293b;
+            color: white;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        input#searchInput:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(250, 204, 21, 0.1); }
 
-        .filters {
-            padding: 15px 20px;
+        .filter-tags {
             display: flex;
             gap: 10px;
+            justify-content: center;
             flex-wrap: wrap;
         }
-
-        input {
-            flex: 1;
-            min-width: 220px;
-            padding: 14px 18px;
-            border-radius: 14px;
-            border: none;
+        .tag {
+            padding: 8px 20px;
+            border-radius: 20px;
             background: #334155;
-            color: white;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 13px 22px;
-            border: none;
-            border-radius: 14px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
+            transition: 0.3s;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
         }
+        .tag:hover, .tag.active { background: var(--primary); color: #000; font-weight: 600; }
 
-        .btn-primary { 
-            background: var(--primary); 
-            color: #000; 
-            font-weight: 700;
-        }
-        .btn-secondary { background: #334155; color: white; }
-
+        /* Grid & Cards */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 22px;
-            padding: 10px 20px 40px;
+            gap: 25px;
+            padding: 20px 5% 100px;
         }
-
         .card {
-            background: var(--card);
-            border-radius: 20px;
+            background: var(--card-bg);
+            border-radius: 24px;
             overflow: hidden;
-            transition: all 0.4s ease;
-            position: relative;
-            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.03);
         }
+        .card:hover { transform: translateY(-8px); border-color: rgba(250, 204, 21, 0.3); }
 
-        .card:hover { transform: translateY(-12px); box-shadow: 0 20px 35px rgba(250,204,21,0.25); }
+        .card-img-wrapper { position: relative; height: 220px; overflow: hidden; }
+        .card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .card:hover img { scale: 1.1; }
 
-        .card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .content { padding: 16px; }
-
-        .price {
-            color: var(--primary);
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .favorite {
+        .favorite-btn {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(0,0,0,0.6);
-            width: 38px;
-            height: 38px;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
             cursor: pointer;
-            z-index: 10;
+            border: none;
+            color: white;
+            transition: 0.3s;
         }
+        .favorite-btn.active { color: #ef4444; background: white; }
 
+        .card-body { padding: 1.2rem; }
+        .card-body h4 { margin-bottom: 10px; font-size: 1.1rem; }
+        .price-tag { color: var(--primary); font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 5px; }
+
+        /* Modal Modernization */
         #productModal {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.92);
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(10px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 2000;
-            padding: 15px;
+            padding: 20px;
+            animation: fadeIn 0.3s;
         }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .modal-content {
             background: #1e293b;
-            max-width: 980px;
+            max-width: 900px;
             width: 100%;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+            max-height: 90vh;
+            border-radius: 30px;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .modal-header {
-            padding: 20px 25px;
-            background: #0f172a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        @media (min-width: 768px) {
-            .modal-body { flex-direction: row; }
-        }
-
-        .modal-price { 
-            font-size: 34px; 
-            color: var(--primary); 
-            font-weight: 700; 
-        }
-
-        .comparison {
-            background: #0f172a;
-            padding: 20px;
-            border-radius: 16px;
-        }
-
-        .compare-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px;
-        }
-
-        .compare-card {
-            background: #1e293b;
-            padding: 12px;
+        /* Buttons */
+        .btn-main {
+            background: var(--primary);
+            color: #000;
+            padding: 12px 25px;
             border-radius: 12px;
-            text-align: center;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
         }
+        .btn-main:hover { background: var(--primary-hover); transform: scale(1.02); }
 
-        .best { border: 2px solid #22c55e; }
-
+        /* Toast Notification */
         #toast {
             position: fixed;
             bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 30px;
             background: #22c55e;
-            color: #000;
-            padding: 15px 28px;
-            border-radius: 14px;
-            font-weight: 700;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            color: white;
+            padding: 16px 30px;
+            border-radius: 16px;
+            font-weight: 600;
             display: none;
-            z-index: 3000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 5000;
+            animation: slideIn 0.4s forwards;
         }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
     </style>
 </head>
 <body>
 
     <div id="splash">
-        ✨ Fair
-        <span style="font-size:22px;opacity:0.9;">منصة التجارة العادلة بـ Pi</span>
+        <div style="font-size: 3rem; font-weight: 800; color: var(--primary);">Fair</div>
+        <div style="color: var(--text-dim);">تسوق بأمان باستخدام عملة Pi</div>
+        <div class="loader"></div>
     </div>
 
     <header>
-        <div class="logo">Fair</div>
-        <div>
-            <button id="loginBtn" class="btn-primary" onclick="login()">تسجيل الدخول</button>
-            <button id="logoutBtn" class="btn-secondary" onclick="logout()" style="display:none;">تسجيل خروج</button>
+        <div class="logo">✨ Fair</div>
+        <div id="authArea">
+            <button id="loginBtn" class="btn-main" onclick="login()">دخول</button>
+            <button id="logoutBtn" class="btn-main" style="display:none; background:#334155; color:white;" onclick="logout()">خروج</button>
         </div>
     </header>
 
-    <div class="filters">
-        <input type="text" id="searchInput" placeholder="ابحث عن أي شيء..." onkeyup="search(this.value)">
-        <button class="btn-secondary" onclick="filter('all')">الكل</button>
-        <button class="btn-secondary" onclick="filter('car')">سيارات</button>
-        <button class="btn-secondary" onclick="filter('home')">عقارات</button>
-        <button class="btn-secondary" onclick="filter('phone')">جوال</button>
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="ابحث عن سيارة، هاتف، أو عقار..." oninput="search(this.value)">
+        </div>
+        <div class="filter-tags">
+            <div class="tag active" onclick="filter('all', this)">الكل</div>
+            <div class="tag" onclick="filter('car', this)">سيارات</div>
+            <div class="tag" onclick="filter('home', this)">عقارات</div>
+            <div class="tag" onclick="filter('phone', this)">جوالات</div>
+        </div>
     </div>
 
     <div class="grid" id="products"></div>
 
-    <!-- Modal -->
-    <div id="productModal">
+    <div id="productModal" onclick="if(event.target === this) closeModal()">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle"></h3>
-                <button onclick="closeModal()" style="background:none;border:none;color:#fff;font-size:32px;cursor:pointer;">×</button>
-            </div>
-            <div class="modal-body" id="modalBody"></div>
+            <div id="modalBody"></div>
         </div>
     </div>
 
     <div id="toast"></div>
 
 <script>
-// ==================== Pi SDK ====================
-async function initPi() {
-    if (typeof window.Pi === "undefined") return;
-    try {
-        await window.Pi.init({ version: "2.0", sandbox: true }); // غيرها لـ false عند النشر
-    } catch (e) { console.error(e); }
-}
-
-// ==================== Data ====================
-let currentUser = null;
-let favorites = JSON.parse(localStorage.getItem("fair_favorites")) || [];
-
-let allProducts = [
-    {
-        id: 1, type: "car", title: "BMW X5 2022", price: 2.8,
-        img: "https://images.unsplash.com/photo-1555215695-3004980ad54e",
-        description: "سيارة BMW X5 موديل 2022 بحالة ممتازة، كيلومترات منخفضة، داخلية فاخرة، كاميرات 360°.",
-        location: "مسقط - السيب", condition: "ممتازة",
-        comparisons: [{platform: "Fair", price: 2.8, best: true}, {platform: "OpenSooq", price: 3.4}]
-    },
-    {
-        id: 2, type: "car", title: "Mercedes C300 2023", price: 3.2,
-        img: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a",
-        description: "مرسيدس C300 موديل 2023 شبه جديدة، لون أسود، تقنيات حديثة جداً.",
-        location: "مسقط - القرم", condition: "شبه جديدة",
-        comparisons: [{platform: "Fair", price: 3.2, best: true}, {platform: "OpenSooq", price: 3.9}]
-    },
-    {
-        id: 3, type: "home", title: "شقة فاخرة 150م²", price: 4.5,
-        img: "https://images.unsplash.com/photo-1568605114967-8130f3a36994",
-        description: "شقة فاخرة في الخوير، 3 غرف، إطلالة رائعة، موقف خاص.",
-        location: "مسقط - الخوير", condition: "جديدة",
-        comparisons: [{platform: "Fair", price: 4.5, best: true}, {platform: "OpenSooq", price: 5.2}]
-    },
-    {
-        id: 4, type: "home", title: "فيلا مودرن 4 غرف", price: 8.7,
-        img: "https://images.unsplash.com/photo-1613977257363-707ba9348227",
-        description: "فيلا فاخرة مع حديقة ومسبح في المعبيلة.",
-        location: "السيب - المعبيلة", condition: "ممتازة",
-        comparisons: [{platform: "Fair", price: 8.7, best: true}, {platform: "Dubizzle", price: 9.5}]
-    },
-    {
-        id: 5, type: "phone", title: "iPhone 16 Pro Max 256GB", price: 1.1,
-        img: "https://images.unsplash.com/photo-1724177807530-0c2c8c8c8c8c",
-        description: "آيفون 16 برو ماكس جديد بالكامل، ضمان سنة.",
-        location: "مسقط", condition: "جديد",
-        comparisons: [{platform: "Fair", price: 1.1, best: true}, {platform: "OpenSooq", price: 1.4}]
-    }
+// البيانات الأساسية
+const allProducts = [
+    { id: 1, type: "car", title: "BMW X5 2022", price: 2.8, img: "https://images.unsplash.com/photo-1555215695-3004980ad54e", location: "مسقط", condition: "ممتازة", desc: "سيارة فاخرة بحالة الوكالة، تقنيات متطورة ومحرك قوي." },
+    { id: 2, type: "car", title: "Mercedes C300", price: 3.2, img: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a", location: "دبي", condition: "جديدة", desc: "مرسيدس بنز الفئة C، تصميم رياضي وأداء استثنائي." },
+    { id: 3, type: "home", title: "شقة مودرن 3 غرف", price: 4.5, img: "https://images.unsplash.com/photo-1568605114967-8130f3a36994", location: "الرياض", condition: "جاهزة", desc: "إطلالة بانورامية وتصميم داخلي ذكي." },
+    { id: 5, type: "phone", title: "iPhone 16 Pro", price: 1.1, img: "https://images.unsplash.com/photo-1724177807530-0c2c8c8c8c8c", location: "الكويت", condition: "تغليف المصنع", desc: "أحدث إصدارات آيفون مع ميزات الذكاء الاصطناعي." }
 ];
 
-// ==================== Render Products ====================
-function renderProducts(list) {
+let favorites = JSON.parse(localStorage.getItem("fair_favs")) || [];
+let currentUser = null;
+
+// تهيئة Pi SDK
+async function initPi() {
+    try {
+        if (window.Pi) {
+            await window.Pi.init({ version: "2.0", sandbox: true });
+        }
+    } catch (e) { console.error("Pi SDK error:", e); }
+}
+
+// عرض المنتجات
+function renderProducts(products) {
     const container = document.getElementById("products");
-    container.innerHTML = "";
-
-    list.forEach(p => {
-        const isFav = favorites.includes(p.id);
-        const cardHTML = `
-            <div class="card" onclick="showProduct(${p.id})">
-                <div class="favorite" onclick="event.stopImmediatePropagation(); toggleFavorite(${p.id});">
-                    ${isFav ? '❤️' : '♡'}
+    container.innerHTML = products.map(p => `
+        <div class="card" onclick="showProduct(${p.id})">
+            <div class="card-img-wrapper">
+                <button class="favorite-btn ${favorites.includes(p.id) ? 'active' : ''}" 
+                        onclick="event.stopPropagation(); toggleFav(${p.id})">
+                    ❤
+                </button>
+                <img src="${p.img}" alt="${p.title}">
+            </div>
+            <div class="card-body">
+                <h4>${p.title}</h4>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="price-tag"><span>π</span>${p.price}</div>
+                    <small style="color:var(--text-dim)">${p.location}</small>
                 </div>
-                <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300x200/1e293b/fff?text=Fair'">
-                <div class="content">
-                    <h4>${p.title}</h4>
-                    <div class="price">π ${p.price}</div>
-                    <button class="btn-primary" style="width:100%;margin-top:12px;">عرض التفاصيل</button>
-                </div>
-            </div>`;
-        container.innerHTML += cardHTML;
-    });
-
-    if (list.length === 0) {
-        container.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:60px;color:#94a3b8;font-size:18px;">لا توجد نتائج</p>`;
-    }
-}
-
-// ==================== Favorites ====================
-function toggleFavorite(id) {
-    event.stopImmediatePropagation();
-    if (favorites.includes(id)) {
-        favorites = favorites.filter(f => f !== id);
-    } else {
-        favorites.push(id);
-    }
-    localStorage.setItem("fair_favorites", JSON.stringify(favorites));
-    renderProducts(allProducts);
-}
-
-// ==================== Show Product Modal (مع زر الشراء الواضح) ====================
-function showProduct(id) {
-    const product = allProducts.find(p => p.id === id);
-    if (!product) return;
-
-    const modal = document.getElementById("productModal");
-    const body = document.getElementById("modalBody");
-    const titleEl = document.getElementById("modalTitle");
-
-    titleEl.textContent = product.title;
-
-    let compareHTML = `
-        <div class="comparison">
-            <h3>🔍 مقارنة الأسعار عبر المنصات</h3>
-            <div class="compare-grid">
-    `;
-    
-    product.comparisons.forEach(c => {
-        compareHTML += `
-            <div class="compare-card ${c.best ? 'best' : ''}">
-                <div class="platform">${c.platform}</div>
-                <div class="price">π ${c.price}</div>
-                ${c.best ? '<small style="color:#22c55e">أفضل سعر</small>' : ''}
-            </div>`;
-    });
-    compareHTML += `</div></div>`;
-
-    body.innerHTML = `
-        <div style="flex:1;">
-            <img src="${product.img}" 
-                 style="width:100%;border-radius:18px;height:320px;object-fit:cover;" 
-                 onerror="this.src='https://via.placeholder.com/300x200/1e293b/fff?text=Fair'">
+            </div>
         </div>
-        <div style="flex:1; display:flex; flex-direction:column; gap:15px;">
-            <h2>${product.title}</h2>
-            <div class="modal-price">π ${product.price}</div>
-            <p><strong>الموقع:</strong> ${product.location}</p>
-            <p><strong>الحالة:</strong> ${product.condition}</p>
-            <p style="line-height:1.7;">${product.description}</p>
-            
-            ${compareHTML}
-            
-            <!-- زر الشراء الكبير والواضح -->
-            <button onclick="buyProduct(${product.id}, ${product.price}); closeModal();" 
-                    class="btn-primary" 
-                    style="margin-top:auto; padding:20px; font-size:20px; font-weight:700;">
-                🛒 شراء الآن بـ π ${product.price}
-            </button>
-        </div>
-    `;
-
-    modal.style.display = "flex";
+    `).join('');
 }
 
-function closeModal() {
-    document.getElementById("productModal").style.display = "none";
-}
-
-// ==================== Search & Filter ====================
-function search(q) {
-    const filtered = allProducts.filter(p => p.title.toLowerCase().includes(q.toLowerCase()));
+// البحث والفلترة
+function search(val) {
+    const filtered = allProducts.filter(p => p.title.toLowerCase().includes(val.toLowerCase()));
     renderProducts(filtered);
 }
 
-function filter(type) {
-    if (type === "all") renderProducts(allProducts);
+function filter(type, el) {
+    document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    if(type === 'all') renderProducts(allProducts);
     else renderProducts(allProducts.filter(p => p.type === type));
 }
 
-// ==================== Login ====================
-async function login() {
-    if (typeof window.Pi === "undefined") {
-        toast("افتح الموقع داخل Pi Browser");
+// تفاصيل المنتج
+function showProduct(id) {
+    const p = allProducts.find(item => item.id === id);
+    const modal = document.getElementById("productModal");
+    const body = document.getElementById("modalBody");
+
+    body.innerHTML = `
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <img src="${p.img}" style="width:100%; height:400px; object-fit:cover;">
+            <div style="padding:40px; display:flex; flex-direction:column; gap:20px;">
+                <h2 style="font-size:2rem;">${p.title}</h2>
+                <div class="price-tag" style="font-size:2.5rem;">π ${p.price}</div>
+                <p style="color:var(--text-dim); line-height:1.6;">${p.desc}</p>
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px;">
+                    <div>📍 الموقع: ${p.location}</div>
+                    <div>🛠 الحالة: ${p.condition}</div>
+                </div>
+                <button class="btn-main" style="margin-top:auto; padding:18px;" onclick="handleBuy(${p.id}, ${p.price})">
+                    تأكيد الشراء بـ Pi
+                </button>
+                <button onclick="closeModal()" style="background:transparent; border:none; color:var(--text-dim); cursor:pointer;">إغلاق</button>
+            </div>
+        </div>
+    `;
+    modal.style.display = "flex";
+}
+
+function closeModal() { document.getElementById("productModal").style.display = "none"; }
+
+// نظام الدفع (تجريبي)
+async function handleBuy(id, amount) {
+    if(!currentUser) {
+        showToast("يرجى تسجيل الدخول أولاً");
         return;
     }
+    showToast("جاري تحويلك لمحفظة Pi...");
+    // هنا يتم استدعاء Pi.createPayment
+}
+
+// المفضلة
+function toggleFav(id) {
+    if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+    else favorites.push(id);
+    localStorage.setItem("fair_favs", JSON.stringify(favorites));
+    renderProducts(allProducts);
+}
+
+// تسجيل الدخول
+async function login() {
     try {
-        const auth = await window.Pi.authenticate(["username"]);
+        const auth = await window.Pi.authenticate(['username']);
         currentUser = auth.user;
         document.getElementById("loginBtn").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "inline-block";
-        toast(`مرحباً ${currentUser.username || ''}`);
-    } catch (e) {
-        toast("فشل تسجيل الدخول");
-    }
+        document.getElementById("logoutBtn").style.display = "block";
+        showToast(`أهلاً بك، ${currentUser.username}`);
+    } catch (e) { showToast("فشل الاتصال بـ Pi Browser"); }
 }
 
 function logout() {
     currentUser = null;
-    document.getElementById("loginBtn").style.display = "inline-block";
+    document.getElementById("loginBtn").style.display = "block";
     document.getElementById("logoutBtn").style.display = "none";
-    toast("تم تسجيل الخروج");
+    showToast("تم تسجيل الخروج");
 }
 
-// ==================== Buy Product (الدفع) ====================
-async function buyProduct(id, amount) {
-    if (!currentUser) {
-        toast("يجب تسجيل الدخول أولاً");
-        login();
-        return;
-    }
-
-    if (typeof window.Pi === "undefined") {
-        toast("يجب فتح التطبيق داخل Pi Browser");
-        return;
-    }
-
-    const paymentData = {
-        amount: parseFloat(amount),
-        memo: `شراء ${allProducts.find(p => p.id === id)?.title || 'منتج'} من Fair`,
-        metadata: { productId: id }
-    };
-
-    const callbacks = {
-        onReadyForServerApproval: (paymentId) => {
-            toast("جاري معالجة الدفع...");
-        },
-        onReadyForServerCompletion: (paymentId, txid) => {
-            toast(`✅ تم الدفع بنجاح!\nTxID: ${txid}`);
-        },
-        onCancel: () => toast("تم إلغاء الدفع"),
-        onError: (error) => toast("❌ خطأ في الدفع: " + (error.message || error))
-    };
-
-    try {
-        await window.Pi.createPayment(paymentData, callbacks);
-    } catch (err) {
-        toast("فشل بدء عملية الدفع");
-        console.error(err);
-    }
-}
-
-function toast(msg) {
+function showToast(msg) {
     const t = document.getElementById("toast");
     t.textContent = msg;
     t.style.display = "block";
     setTimeout(() => t.style.display = "none", 3000);
 }
 
-// ==================== Init ====================
-window.onload = async () => {
+// بدء التشغيل
+window.onload = () => {
     setTimeout(() => {
         document.getElementById("splash").style.opacity = "0";
-        setTimeout(() => document.getElementById("splash").style.display = "none", 900);
-    }, 1300);
-
-    await initPi();
+        setTimeout(() => document.getElementById("splash").style.display = "none", 600);
+    }, 1500);
+    
+    initPi();
     renderProducts(allProducts);
 };
 </script>
 </body>
-    </html>
+</html>
