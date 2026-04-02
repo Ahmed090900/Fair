@@ -10,319 +10,139 @@
     <style>
         :root {
             --primary: #facc15;
-            --primary-hover: #eab308;
             --dark-bg: #0f172a;
             --card-bg: #1e293b;
             --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --accent: #3b82f6;
+            --accent-success: #22c55e;
         }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
         
         body {
-            font-family: 'Cairo', sans-serif;
             background-color: var(--dark-bg);
             color: var(--text-main);
             min-height: 100vh;
-            overflow-x: hidden;
         }
-
-        /* Splash Screen */
-        #splash {
-            position: fixed;
-            inset: 0;
-            background: #020617;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 5px solid var(--card-bg);
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-top: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* Header */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 5%;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(15px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%; background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
 
-        /* Search & Filters */
-        .search-container {
-            padding: 20px 5%;
-            background: linear-gradient(to bottom, rgba(15, 23, 42, 1), transparent);
-        }
-        .search-box {
-            position: relative;
-            max-width: 600px;
-            margin: 0 auto 20px;
-        }
+        /* Search & Filter */
+        .controls { padding: 20px 5%; text-align: center; }
         input#searchInput {
-            width: 100%;
-            padding: 15px 25px;
-            border-radius: 30px;
-            border: 2px solid #334155;
-            background: #1e293b;
-            color: white;
-            font-size: 1rem;
-            transition: 0.3s;
+            width: 100%; max-width: 500px; padding: 12px 20px;
+            border-radius: 25px; border: 2px solid #334155;
+            background: #1e293b; color: white; margin-bottom: 15px;
         }
-        input#searchInput:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(250, 204, 21, 0.1); }
 
-        .filter-tags {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .tag {
-            padding: 8px 20px;
-            border-radius: 20px;
-            background: #334155;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 0.9rem;
-            border: 1px solid transparent;
-        }
-        .tag:hover, .tag.active { background: var(--primary); color: #000; font-weight: 600; }
-
-        /* Grid & Cards */
+        /* Grid */
         .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 20px 5% 100px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px; padding: 0 5% 50px;
         }
         .card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255,255,255,0.03);
+            background: var(--card-bg); border-radius: 20px; overflow: hidden;
+            transition: 0.3s; cursor: pointer; border: 1px solid transparent;
         }
-        .card:hover { transform: translateY(-8px); border-color: rgba(250, 204, 21, 0.3); }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-content { padding: 15px; }
 
-        .card-img-wrapper { position: relative; height: 220px; overflow: hidden; }
-        .card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .card:hover img { scale: 1.1; }
-
-        .favorite-btn {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: none;
-            color: white;
-            transition: 0.3s;
-        }
-        .favorite-btn.active { color: #ef4444; background: white; }
-
-        .card-body { padding: 1.2rem; }
-        .card-body h4 { margin-bottom: 10px; font-size: 1.1rem; }
-        .price-tag { color: var(--primary); font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 5px; }
-
-        /* Modal Modernization */
+        /* Modal */
         #productModal {
-            position: fixed;
-            inset: 0;
-            background: rgba(2, 6, 23, 0.85);
-            backdrop-filter: blur(10px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-            animation: fadeIn 0.3s;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; align-items: center; justify-content: center; z-index: 2000;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .modal-content {
-            background: #1e293b;
-            max-width: 900px;
-            width: 100%;
-            max-height: 90vh;
-            border-radius: 30px;
-            overflow-y: auto;
-            position: relative;
-            border: 1px solid rgba(255,255,255,0.1);
+        .modal-box {
+            background: #1e293b; width: 90%; max-width: 800px; 
+            border-radius: 25px; overflow: hidden; position: relative;
         }
 
         /* Buttons */
-        .btn-main {
-            background: var(--primary);
-            color: #000;
-            padding: 12px 25px;
-            border-radius: 12px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            transition: 0.3s;
+        .btn-pay {
+            background: var(--primary); color: #000; width: 100%;
+            padding: 15px; border: none; border-radius: 12px;
+            font-weight: 700; font-size: 1.1rem; cursor: pointer;
         }
-        .btn-main:hover { background: var(--primary-hover); transform: scale(1.02); }
 
-        /* Toast Notification */
         #toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #22c55e;
-            color: white;
-            padding: 16px 30px;
-            border-radius: 16px;
-            font-weight: 600;
-            display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 5000;
-            animation: slideIn 0.4s forwards;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--accent-success); color: white; padding: 12px 25px;
+            border-radius: 10px; display: none; z-index: 3000;
         }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <div style="font-size: 3rem; font-weight: 800; color: var(--primary);">Fair</div>
-        <div style="color: var(--text-dim);">تسوق بأمان باستخدام عملة Pi</div>
-        <div class="loader"></div>
-    </div>
-
     <header>
-        <div class="logo">✨ Fair</div>
-        <div id="authArea">
-            <button id="loginBtn" class="btn-main" onclick="login()">دخول</button>
-            <button id="logoutBtn" class="btn-main" style="display:none; background:#334155; color:white;" onclick="logout()">خروج</button>
+        <div class="logo">Fair</div>
+        <div id="userProfile">
+            <button id="loginBtn" onclick="login()" style="background:var(--primary); border:none; padding:8px 20px; border-radius:10px; font-weight:700; cursor:pointer;">دخول</button>
         </div>
     </header>
 
-    <div class="search-container">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="ابحث عن سيارة، هاتف، أو عقار..." oninput="search(this.value)">
-        </div>
-        <div class="filter-tags">
-            <div class="tag active" onclick="filter('all', this)">الكل</div>
-            <div class="tag" onclick="filter('car', this)">سيارات</div>
-            <div class="tag" onclick="filter('home', this)">عقارات</div>
-            <div class="tag" onclick="filter('phone', this)">جوالات</div>
-        </div>
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="ابحث عن منتج..." oninput="search(this.value)">
     </div>
 
-    <div class="grid" id="products"></div>
+    <div class="grid" id="productsGrid"></div>
 
-    <div id="productModal" onclick="if(event.target === this) closeModal()">
-        <div class="modal-content">
-            <div id="modalBody"></div>
-        </div>
+    <div id="productModal" onclick="if(event.target===this) closeModal()">
+        <div class="modal-box" id="modalContent"></div>
     </div>
 
     <div id="toast"></div>
 
 <script>
-// البيانات الأساسية
-const allProducts = [
-    { id: 1, type: "car", title: "BMW X5 2022", price: 2.8, img: "https://images.unsplash.com/photo-1555215695-3004980ad54e", location: "مسقط", condition: "ممتازة", desc: "سيارة فاخرة بحالة الوكالة، تقنيات متطورة ومحرك قوي." },
-    { id: 2, type: "car", title: "Mercedes C300", price: 3.2, img: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a", location: "دبي", condition: "جديدة", desc: "مرسيدس بنز الفئة C، تصميم رياضي وأداء استثنائي." },
-    { id: 3, type: "home", title: "شقة مودرن 3 غرف", price: 4.5, img: "https://images.unsplash.com/photo-1568605114967-8130f3a36994", location: "الرياض", condition: "جاهزة", desc: "إطلالة بانورامية وتصميم داخلي ذكي." },
-    { id: 5, type: "phone", title: "iPhone 16 Pro", price: 1.1, img: "https://images.unsplash.com/photo-1724177807530-0c2c8c8c8c8c", location: "الكويت", condition: "تغليف المصنع", desc: "أحدث إصدارات آيفون مع ميزات الذكاء الاصطناعي." }
+// 1. إعداد البيانات
+const products = [
+    { id: 101, title: "iPhone 15 Pro", price: 0.85, img: "https://images.unsplash.com/photo-1696446701796-da61225697cc?w=500", desc: "نسخة 256 جيجا، حالة ممتازة." },
+    { id: 102, title: "Tesla Model 3", price: 1500, img: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=500", desc: "موديل 2023، دفع كلي." },
+    { id: 103, title: "MacBook Air M2", price: 1.2, img: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=500", desc: "رام 16 جيجا، لون رمادي فضائي." }
 ];
 
-let favorites = JSON.parse(localStorage.getItem("fair_favs")) || [];
 let currentUser = null;
 
-// تهيئة Pi SDK
+// 2. تهيئة Pi SDK
 async function initPi() {
     try {
-        if (window.Pi) {
-            await window.Pi.init({ version: "2.0", sandbox: true });
-        }
-    } catch (e) { console.error("Pi SDK error:", e); }
+        await window.Pi.init({ version: "2.0", sandbox: true });
+        console.log("Pi SDK Initialized");
+    } catch (e) { console.error(e); }
 }
 
-// عرض المنتجات
-function renderProducts(products) {
-    const container = document.getElementById("products");
-    container.innerHTML = products.map(p => `
-        <div class="card" onclick="showProduct(${p.id})">
-            <div class="card-img-wrapper">
-                <button class="favorite-btn ${favorites.includes(p.id) ? 'active' : ''}" 
-                        onclick="event.stopPropagation(); toggleFav(${p.id})">
-                    ❤
-                </button>
-                <img src="${p.img}" alt="${p.title}">
-            </div>
-            <div class="card-body">
-                <h4>${p.title}</h4>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div class="price-tag"><span>π</span>${p.price}</div>
-                    <small style="color:var(--text-dim)">${p.location}</small>
-                </div>
+// 3. وظائف الواجهة
+function render(items) {
+    const grid = document.getElementById("productsGrid");
+    grid.innerHTML = items.map(p => `
+        <div class="card" onclick="showDetails(${p.id})">
+            <img src="${p.img}">
+            <div class="card-content">
+                <h3>${p.title}</h3>
+                <p style="color:var(--primary); font-weight:bold; font-size:1.2rem;">π ${p.price}</p>
             </div>
         </div>
     `).join('');
 }
 
-// البحث والفلترة
-function search(val) {
-    const filtered = allProducts.filter(p => p.title.toLowerCase().includes(val.toLowerCase()));
-    renderProducts(filtered);
-}
-
-function filter(type, el) {
-    document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    if(type === 'all') renderProducts(allProducts);
-    else renderProducts(allProducts.filter(p => p.type === type));
-}
-
-// تفاصيل المنتج
-function showProduct(id) {
-    const p = allProducts.find(item => item.id === id);
+function showDetails(id) {
+    const p = products.find(x => x.id === id);
     const modal = document.getElementById("productModal");
-    const body = document.getElementById("modalBody");
-
-    body.innerHTML = `
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-            <img src="${p.img}" style="width:100%; height:400px; object-fit:cover;">
-            <div style="padding:40px; display:flex; flex-direction:column; gap:20px;">
-                <h2 style="font-size:2rem;">${p.title}</h2>
-                <div class="price-tag" style="font-size:2.5rem;">π ${p.price}</div>
-                <p style="color:var(--text-dim); line-height:1.6;">${p.desc}</p>
-                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px;">
-                    <div>📍 الموقع: ${p.location}</div>
-                    <div>🛠 الحالة: ${p.condition}</div>
-                </div>
-                <button class="btn-main" style="margin-top:auto; padding:18px;" onclick="handleBuy(${p.id}, ${p.price})">
-                    تأكيد الشراء بـ Pi
-                </button>
-                <button onclick="closeModal()" style="background:transparent; border:none; color:var(--text-dim); cursor:pointer;">إغلاق</button>
-            </div>
+    const content = document.getElementById("modalContent");
+    
+    content.innerHTML = `
+        <img src="${p.img}" style="width:100%; height:300px; object-fit:cover;">
+        <div style="padding:25px;">
+            <h2>${p.title}</h2>
+            <p style="margin:15px 0; color:#cbd5e1;">${p.desc}</p>
+            <div style="font-size:1.5rem; font-weight:800; color:var(--primary); margin-bottom:20px;">π ${p.price}</div>
+            <button class="btn-pay" onclick="buyNow(${p.id}, ${p.price})">شراء الآن باستخدام Pi</button>
         </div>
     `;
     modal.style.display = "flex";
@@ -330,58 +150,75 @@ function showProduct(id) {
 
 function closeModal() { document.getElementById("productModal").style.display = "none"; }
 
-// نظام الدفع (تجريبي)
-async function handleBuy(id, amount) {
-    if(!currentUser) {
-        showToast("يرجى تسجيل الدخول أولاً");
+// 4. منطق الدفع (The Core Logic)
+async function buyNow(productId, amount) {
+    if (!currentUser) {
+        showToast("يرجى تسجيل الدخول عبر Pi أولاً");
+        login();
         return;
     }
-    showToast("جاري تحويلك لمحفظة Pi...");
-    // هنا يتم استدعاء Pi.createPayment
+
+    try {
+        const payment = await window.Pi.createPayment({
+            amount: parseFloat(amount),
+            memo: `طلب رقم #${productId} من Fair`,
+            metadata: { productId: productId },
+        }, {
+            // المرحلة الأولى: الموافقة (Approval)
+            onReadyForServerApproval: async (paymentId) => {
+                showToast("جاري تأكيد الدفع مع السيرفر...");
+                console.log("Approval Needed for:", paymentId);
+                
+                /* هنا يجب إرسال paymentId إلى سيرفرك الخاص (Backend) 
+                   ليقوم السيرفر باستدعاء Pi API وعمل Approve.
+                */
+            },
+            
+            // المرحلة الثانية: الإكمال (Completion)
+            onReadyForServerCompletion: async (paymentId, txid) => {
+                showToast("✅ تم الدفع بنجاح! رقم المعاملة: " + txid.substring(0,8));
+                console.log("Completion Needed. TXID:", txid);
+                
+                /* هنا ترسل txid و paymentId للسيرفر ليقوم بعمل Complete 
+                   ويتم تسجيل المنتج باسم المستخدم في قاعدة بياناتك.
+                */
+                closeModal();
+            },
+            
+            onCancel: (paymentId) => showToast("تم إلغاء المعاملة"),
+            onError: (error) => showToast("حدث خطأ في الدفع")
+        });
+    } catch (err) {
+        console.error(err);
+        showToast("فشل بدء عملية الدفع");
+    }
 }
 
-// المفضلة
-function toggleFav(id) {
-    if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
-    else favorites.push(id);
-    localStorage.setItem("fair_favs", JSON.stringify(favorites));
-    renderProducts(allProducts);
-}
-
-// تسجيل الدخول
+// 5. الحساب والبحث
 async function login() {
     try {
         const auth = await window.Pi.authenticate(['username']);
         currentUser = auth.user;
-        document.getElementById("loginBtn").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "block";
-        showToast(`أهلاً بك، ${currentUser.username}`);
-    } catch (e) { showToast("فشل الاتصال بـ Pi Browser"); }
+        document.getElementById("userProfile").innerHTML = `<span style="font-weight:bold;">${currentUser.username}</span>`;
+        showToast(`أهلاً بك ${currentUser.username}`);
+    } catch (e) { console.error(e); }
 }
 
-function logout() {
-    currentUser = null;
-    document.getElementById("loginBtn").style.display = "block";
-    document.getElementById("logoutBtn").style.display = "none";
-    showToast("تم تسجيل الخروج");
+function search(query) {
+    const filtered = products.filter(p => p.title.toLowerCase().includes(query.toLowerCase()));
+    render(filtered);
 }
 
 function showToast(msg) {
     const t = document.getElementById("toast");
     t.textContent = msg;
     t.style.display = "block";
-    setTimeout(() => t.style.display = "none", 3000);
+    setTimeout(() => t.style.display = "none", 4000);
 }
 
-// بدء التشغيل
 window.onload = () => {
-    setTimeout(() => {
-        document.getElementById("splash").style.opacity = "0";
-        setTimeout(() => document.getElementById("splash").style.display = "none", 600);
-    }, 1500);
-    
     initPi();
-    renderProducts(allProducts);
+    render(products);
 };
 </script>
 </body>
