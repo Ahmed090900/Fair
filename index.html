@@ -1,72 +1,76 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Fair - منصة التجارة العادلة</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fair - منصة التجارة العادلة</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --primary: #facc15;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --accent-success: #22c55e;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-        body { background-color: var(--dark-bg); color: var(--text-main); min-height:100vh; }
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 1rem 5%; background: rgba(15,23,42,0.9);
-            backdrop-filter: blur(10px); position: sticky; top:0; z-index:1000;
-            border-bottom:1px solid rgba(255,255,255,0.05);
-        }
-        .logo { font-size:1.8rem; font-weight:800; color: var(--primary); }
+<style>
+:root {
+    --primary: #facc15;
+    --dark-bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --accent-success: #22c55e;
+}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Cairo',sans-serif; }
+body { background-color: var(--dark-bg); color: var(--text-main); min-height:100vh; }
 
-        /* Controls */
-        .controls { padding: 20px 5%; text-align:center; }
-        input#searchInput {
-            width: 100%; max-width:500px; padding:12px 20px;
-            border-radius:25px; border:2px solid #334155;
-            background:#1e293b; color:white; margin-bottom:15px;
-        }
+/* Header */
+header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:1rem 5%; background:rgba(15,23,42,0.9);
+    backdrop-filter: blur(10px); position:sticky; top:0; z-index:1000;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.logo { font-size:1.8rem; font-weight:800; color: var(--primary); }
 
-        /* Grid */
-        .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; padding:0 5% 50px; }
-        .card {
-            background: var(--card-bg); border-radius:20px; overflow:hidden;
-            transition:0.3s; cursor:pointer; border:1px solid transparent;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .card img { width:100%; height:200px; object-fit:cover; transition: transform 0.3s ease; }
-        .card:hover img { transform: scale(1.05); }
-        .card-content { padding:15px; }
+/* Controls */
+.controls { padding:20px 5%; text-align:center; }
+input#searchInput {
+    width:100%; max-width:500px; padding:12px 20px;
+    border-radius:25px; border:2px solid #334155;
+    background:#1e293b; color:white; margin-bottom:15px;
+}
 
-        /* Modal */
-        #productModal {
-            position:fixed; inset:0; background: rgba(0,0,0,0.8);
-            display:none; align-items:center; justify-content:center; z-index:2000;
-        }
-        .modal-box {
-            background:#1e293b; width:90%; max-width:800px;
-            border-radius:25px; overflow:hidden; position:relative;
-        }
+/* Grid */
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; padding:0 5% 50px; }
+.card {
+    background: var(--card-bg); border-radius:20px; overflow:hidden;
+    transition:0.3s; cursor:pointer; border:1px solid transparent;
+}
+.card:hover { transform: translateY(-5px); border-color: var(--primary); }
+.card img { width:100%; height:200px; object-fit:cover; transition: transform 0.3s ease; }
+.card:hover img { transform: scale(1.05); }
+.card-content { padding:15px; }
 
-        /* Buttons */
-        .btn-pay {
-            background: var(--primary); color:#000; width:100%;
-            padding:15px; border:none; border-radius:12px;
-            font-weight:700; font-size:1.1rem; cursor:pointer;
-        }
+/* Modal */
+#productModal {
+    position:fixed; inset:0; background: rgba(0,0,0,0.8);
+    display:none; align-items:center; justify-content:center; z-index:2000;
+}
+.modal-box {
+    background:#1e293b; width:90%; max-width:800px;
+    border-radius:25px; overflow:hidden; position:relative;
+    animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform:translateY(0);} }
 
-        #toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--accent-success); color: white; padding: 12px 25px;
-            border-radius: 10px; display: none; z-index: 3000;
-        }
-    </style>
+/* Buttons */
+.btn-pay {
+    background: var(--primary); color:#000; width:100%;
+    padding:15px; border:none; border-radius:12px;
+    font-weight:700; font-size:1.1rem; cursor:pointer;
+}
+
+#toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--accent-success); color: white; padding: 12px 25px;
+    border-radius: 10px; display: none; z-index: 3000;
+}
+</style>
 </head>
 <body>
 <header>
@@ -88,10 +92,13 @@
 
 <div id="toast"></div>
 
+<script src="approve.js"></script>
+<script src="complete.js"></script>
+
 <script>
 // بيانات المنتجات
 const products = [
-    { id: 101, title: "iPhone 15 Pro", price: 0.85, img: "https://images.unsplash.com/photo-1696446701796-da61225697cc?w=500", desc: "نسخة 256 جيجا، حالة ممتازة." },
+    { id: 101, title: "iPhone 15 Pro", price: 0.85, img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-15-pro-gold-select?wid=940&hei=1112&fmt=png-alpha&.v=1695171218574", desc: "نسخة 256 جيجا، حالة ممتازة." },
     { id: 102, title: "Tesla Model 3", price: 1500, img: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=500", desc: "موديل 2023، دفع كلي." },
     { id: 103, title: "MacBook Air M2", price: 1.2, img: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=500", desc: "رام 16 جيجا، لون رمادي فضائي." }
 ];
@@ -99,7 +106,7 @@ const products = [
 let currentUser = null;
 
 // تهيئة Pi SDK
-async function initPi() {
+async function initPi(){
     try { await window.Pi.init({ version:"2.0", sandbox:true }); console.log("Pi SDK Initialized"); }
     catch(e){ console.error(e); }
 }
@@ -120,7 +127,7 @@ function render(items){
 
 // فتح الـ Modal
 function showDetails(id){
-    document.body.style.overflow="hidden"; // منع scroll خلف المودال
+    document.body.style.overflow="hidden";
     const p = products.find(x => x.id===id);
     const modal = document.getElementById("productModal");
     const content = document.getElementById("modalContent");
@@ -139,32 +146,34 @@ function showDetails(id){
 
 function closeModal(){
     document.getElementById("productModal").style.display="none";
-    document.body.style.overflow="auto"; // إعادة scroll
+    document.body.style.overflow="auto";
 }
 
 // الدفع
 async function buyNow(productId, amount){
     if(!currentUser){ showToast("يرجى تسجيل الدخول عبر Pi أولاً"); login(); return; }
 
-    try {
+    try{
         const payment = await window.Pi.createPayment({
             amount: parseFloat(amount),
             memo:`طلب رقم #${productId} من Fair`,
             metadata:{productId}
         },{
-            onReadyForServerApproval: async (paymentId)=>{
+            onReadyForServerApproval: async(paymentId)=>{
                 showToast("جاري تأكيد الدفع مع السيرفر...");
                 console.log("Approval Needed for:", paymentId);
-                // هنا ترسل paymentId لسيرفرك لعمل Approve
+                // استدعاء ملف approve.js
+                approvePayment(paymentId);
             },
-            onReadyForServerCompletion: async (paymentId, txid)=>{
+            onReadyForServerCompletion: async(paymentId, txid)=>{
                 showToast("✅ تم الدفع بنجاح! رقم المعاملة: " + txid.substring(0,8));
                 console.log("Completion Needed. TXID:", txid);
                 closeModal();
-                // هنا ترسل paymentId و txid لسيرفرك لعمل Complete وتسجيل المنتج
+                // استدعاء ملف complete.js
+                completePayment(paymentId, txid);
             },
-            onCancel: (paymentId)=> showToast("تم إلغاء المعاملة"),
-            onError: (err)=> showToast("حدث خطأ في الدفع")
+            onCancel: ()=> showToast("تم إلغاء المعاملة"),
+            onError: ()=> showToast("حدث خطأ في الدفع")
         });
     } catch(err){ console.error(err); showToast("فشل بدء عملية الدفع"); }
 }
@@ -210,4 +219,4 @@ window.onload = ()=>{
 };
 </script>
 </body>
-</html>
+    </html>٩
